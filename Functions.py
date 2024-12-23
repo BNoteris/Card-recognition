@@ -22,6 +22,7 @@ class Template:
     def __init__(self):
         self.img = [] # Thresholded, sized rank image loaded from hard drive
         self.rank = "Placeholder"
+        self.value = 0
 
 def Load_Templates(filepath):    
     ranks = ["A", "2", "3", "4","5",
@@ -34,6 +35,13 @@ def Load_Templates(filepath):
         for rank in ranks:
             t_object = Template()
             t_object.rank = f"{rank}{suit}"
+            if rank in ['J', 'Q', 'K']:  
+                    t_object.value = 10
+            elif rank == 'A':  
+                t_object.value = 11
+            else:
+                t_object.value = int(rank)
+
             filename = f"{rank}{suit}.jpg"
             img_path = os.path.join(filepath, filename)
             
@@ -59,7 +67,7 @@ class Card:
         self.img = [] # 200x300, flattened, grayed, blurred image
         self.corner = [] # image of the corner of the card
         self.rank = "Unknown"  # Detected rank of the card
-        self.suit = "Unknown" # Detected suit of the card
+        self.value = 0 # Detected suit of the card
 
 
 def Process_image(image):
@@ -204,47 +212,6 @@ def Reshape_Card(image, corner_pts, width, height):
         return None
 
 
-
-def Get_Card_Corner(card_reshaped):
-    """
-    Extracts and zooms in on the corner of the reshaped card image.
-    
-    Args:
-        card_reshaped (ndarray): Warped card image of size 200x300.
-    
-    Returns:
-        ndarray: The zoomed-in corner of the card.
-    """
-    # Extract the top-left corner of the card image
-    card_corner = card_reshaped[10:CORNER_HEIGHT, 10:CORNER_WIDTH]
-    
-    # Perform a 4x zoom on the corner
-    card_corner_zoom = cv2.resize(card_corner, (0, 0), fx=4, fy=4)
-    card_rank_zoom = card_corner_zoom[0:170, 0:160]
-    card_suit_zoom = card_corner_zoom[130:280, 0:160]
-
-
-    
-    return card_corner_zoom,card_rank_zoom,card_suit_zoom
-
-def process_zoom(zoom_region):
-        # Preprocess the image
-        blur = cv2.GaussianBlur(zoom_region, (3, 3), 0)
-        edges = cv2.Canny(blur, 10, 50)
-        kernel = np.ones((3, 3))
-        dial = cv2.dilate(edges, kernel=kernel, iterations=2)
-
-        # Find contours
-        contours, _ = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  # Sort by contour area
-
-        # Check if contours exist and return the bounding box
-        if sorted_contours:
-            return cv2.boundingRect(sorted_contours[0])
-        else:
-            return None  # No bounding box found
-
-
 def compute_diff_score(image1, image2):
 
         img1 = Process_image(image1)
@@ -260,22 +227,7 @@ def compute_diff_score(image1, image2):
 
 
 
-
-def Save_Corner(corner, image_name):
-    """
-    Saves the zoomed-in card corner to a file.
-    
-    Args:
-        corner (ndarray): The corner image to save.
-        image_name (str): Name for the saved image file.
-    """
-    # Construct the filename and save the corner image
-    filename = f'Corners/{image_name}.jpg'
-    cv2.imwrite(filename, corner)
-
-
-
-def Match_Corners(cards, image, templates):
+def Match_Cards(cards, image, templates):
     """
     Matches detected cards with family ranks and suits based on corner similarity.
 
@@ -298,7 +250,7 @@ def Match_Corners(cards, image, templates):
         cards_found.append(processed_card)
 
         best_match = None  # To store the best match for the current card's rank
-        
+        value_best_match = 0
         best_diff_value = float('inf')  # Initialize with a large value for ranks
        
 
@@ -315,12 +267,14 @@ def Match_Corners(cards, image, templates):
             if absdiff_scores < best_diff_value:
                 best_diff_value = absdiff_scores
                 best_match = template.rank
+                value_best_match = template.value
 
        
 
         # After checking all family ranks and suits, assign the best matches
         if best_match is not None:
             processed_card.rank = best_match
+            processed_card.value = value_best_match
         
 
         matching_cards.append(processed_card)
@@ -358,4 +312,151 @@ def draw_results(image, card):
 def Save_template_cards(card, dest_folder,unique_name):
     filename = os.path.join(dest_folder, f'{unique_name}.jpg')
     cv2.imwrite(filename, card)
+
+import cv2
+
+def divide_into_zones(frame, scorep1=0, scorep2=0, scorep3=0, scorep4=0):
+    """
+    Divides the frame into 4 zones: top-left, top-right, bottom-left, bottom-right.
+    Also marks the zone with the highest score with the text "winning" in the center of that zone.
+    
+    Args:
+        frame: The input video frame.
+        scorep1, scorep2, scorep3, scorep4: Scores for each of the four zones.
+    
+    Returns:
+        The modified frame with the zones and the "winning" text, and the zones dictionary.
+    """
+    height, width, _ = frame.shape  # Get frame dimensions
+
+    # Calculate midpoints
+    mid_x, mid_y = width // 2, height // 2
+
+    # Define the zones
+    zones = {
+        "top_left": frame[0:mid_y, 0:mid_x],
+        "top_right": frame[0:mid_y, mid_x:width],
+        "bottom_left": frame[mid_y:height, 0:mid_x],
+        "bottom_right": frame[mid_y:height, mid_x:width]
+    }
+
+    # Draw visual lines for the zones
+    cv2.line(frame, (mid_x, 0), (mid_x, height), (0, 255, 0), 2)  # Vertical line
+    cv2.line(frame, (0, mid_y), (width, mid_y), (0, 255, 0), 2)   # Horizontal line
+
+    # Add titles for each zone
+    titles = {
+        "top_left": f"Player 1 : {scorep1} ",
+        "top_right": f"Player 2 : {scorep2} ",
+        "bottom_left": f"Player 3 : {scorep3} ",
+        "bottom_right": f"Player 4 : {scorep4} "
+    }
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 0.8
+    color = (0, 255, 0)  # Green
+    thickness = 2
+
+    # Add text for each zone
+    cv2.putText(frame, titles["top_left"], (10, 30), font, font_scale, color, thickness, cv2.LINE_AA)
+    cv2.putText(frame, titles["top_right"], (mid_x + 10, 30), font, font_scale, color, thickness, cv2.LINE_AA)
+    cv2.putText(frame, titles["bottom_left"], (10, mid_y + 30), font, font_scale, color, thickness, cv2.LINE_AA)
+    cv2.putText(frame, titles["bottom_right"], (mid_x + 10, mid_y + 30), font, font_scale, color, thickness, cv2.LINE_AA)
+
+    # Determine which zone has the highest score
+    scores = [scorep1, scorep2, scorep3, scorep4]
+    zones_names = ["top_left", "top_right", "bottom_left", "bottom_right"]
+
+    # Filter scores greater than 21
+    valid_scores = [score if score <= 21 else float('-inf') for score in scores]
+
+    # Find the index of the highest valid score
+    if max(valid_scores) == float('-inf'):
+        # All scores are over 21
+        center = (mid_x, mid_y)
+        status = "Draw"
+    else:
+        max_score_index = valid_scores.index(max(valid_scores))
+        winning_zone = zones_names[max_score_index]
+        status = "Winning"
+
+    # Handling ties
+    highest_scores = sorted(valid_scores, reverse=True)
+
+    # Determine the center coordinates of the winning zone
+    if max(valid_scores) == 0:
+        center = (mid_x, mid_y)
+        status = ""
+    elif highest_scores[0] == highest_scores[1]:
+        center = (mid_x, mid_y)
+        status = "Draw"
+    elif winning_zone == "top_left":
+        center = (mid_x // 2, mid_y // 2)
+    elif winning_zone == "top_right":
+        center = (mid_x + mid_x // 2, mid_y // 2)
+    elif winning_zone == "bottom_left":
+        center = (mid_x // 2, mid_y + mid_y // 2)
+    elif winning_zone == "bottom_right":  # "bottom_right"
+        center = (mid_x + mid_x // 2, mid_y + mid_y // 2)
+
+    # Add "Lost" text to zones with scores over 21
+    for i, score in enumerate(scores):
+        if score > 21:
+            zone_center = (mid_x // 2, mid_y // 2) if zones_names[i] == "top_left" else (
+                (mid_x + mid_x // 2, mid_y // 2) if zones_names[i] == "top_right" else (
+                    (mid_x // 2, mid_y + mid_y // 2) if zones_names[i] == "bottom_left" else (mid_x + mid_x // 2, mid_y + mid_y // 2)))
+            cv2.putText(frame, "Lost", zone_center, font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
+
+    # Add "winning" text to the winning zone
+    if status == "Winning":
+        cv2.putText(frame, status, center, font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
+    elif status == "Draw":
+        cv2.putText(frame, status, center, font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
+
+
+    return frame, zones
+
+
+def determine_zone(frame, card):
+    """
+    Determines in which zone the center of the card is located.
+    
+    Args:
+        frame: The input video frame (used to calculate midpoints).
+        card: A card object that contains the center attribute.
+    
+    Returns:
+        The zone name as a string ("top_left", "top_right", "bottom_left", "bottom_right").
+    """
+    player_1 = []
+    player_2 = []
+    player_3 = []
+    player_4 = []
+    height, width, _ = frame.shape  # Get frame dimensions
+
+    # Calculate midpoints of the frame
+    mid_x, mid_y = width // 2, height // 2
+
+    # Get the center of the card (card.center should be a tuple or list like (x, y))
+    center = card.center  # Assuming card.center is a (x, y) tuple
+
+    # Determine which zone the card center belongs to
+    if center[0] < mid_x and center[1] < mid_y:
+        player_1.append(card)
+    elif center[0] >= mid_x and center[1] < mid_y:
+        player_2.append(card)
+    elif center[0] < mid_x and center[1] >= mid_y:
+        player_3.append(card)
+    else:
+        player_4.append(card)
+
+    return player_1, player_2, player_3, player_4    
+
+def calculate_score(cards):
+    score = 0   
+    for card in cards:
+        value = card.value
+        score += int(value)
+
+    return score
 
