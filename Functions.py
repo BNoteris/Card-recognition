@@ -13,58 +13,39 @@ CARD_MIN_AREA = 10000
 CORNER_WIDTH = 45
 CORNER_HEIGHT = 70
 MATCH_VALUE = 500000
-THRESH_LVL = 100
+THRESH_LVL = 140
 
-class Rank:
+
+class Template:
     """Structure to store information about family rank images."""
 
     def __init__(self):
         self.img = [] # Thresholded, sized rank image loaded from hard drive
         self.rank = "Placeholder"
-class Suit:
-    def __init__(self):
-        self.img = []
-        self.suit = "Placeholder"
 
-def Load_Ranks(filepath):
-    family_ranks = []
+def Load_Templates(filepath):    
     ranks = ["A", "2", "3", "4","5",
              "6", "7", "8", "9", "10",
              "J", "Q", "K"]
-
-    for rank in ranks:
-        rank_object = Rank()
-        rank_object.rank = rank
-        filename = f"{rank}.jpg"
-        img_path = os.path.join(filepath, filename)
-        
-        # Load image and handle potential errors
-        rank_object.img = cv2.imread(img_path)
-        if rank_object.img is None:
-            print(f"Warning: Image {img_path} could not be loaded.")
-
-        family_ranks.append(rank_object)
-
-    return family_ranks
-
-def Load_Suits(filepath):
-    family_suits = []
     suits = ["H", "S", "D", "C"]
 
+    templates = []
     for suit in suits:
-        suit_object = Suit()
-        suit_object.suit = suit
-        filename = f"{suit}.jpg"
-        img_path = os.path.join(filepath, filename)
+        for rank in ranks:
+            t_object = Template()
+            t_object.rank = f"{rank}{suit}"
+            filename = f"{rank}{suit}.jpg"
+            img_path = os.path.join(filepath, filename)
+            
+            # Load image and handle potential errors
+            t_object.img = cv2.imread(img_path)
+            if t_object.img is None:
+                print(f"Warning: Image {img_path} could not be loaded.")
 
-        # Load image and handle potential errors
-        suit_object.img = cv2.imread(img_path)
-        if suit_object.img is None:
-            print(f"Warning: Image {img_path} could not be loaded.")
+            templates.append(t_object)
 
-        family_suits.append(suit_object)
+    return templates        
 
-    return family_suits
 
 
 class Card:
@@ -189,22 +170,26 @@ def Reshape_Card(image, corner_pts, width, height):
     
     # If corner_pts is a 2D array with 4 points and 2 coordinates each
     if corner_pts.shape == (4, 2):
-        top_left = corner_pts[0]
-        top_right = corner_pts[1]
-        bot_right = corner_pts[2]
-        bot_left = corner_pts[3]
+        # Step 1: Sort points by y-coordinate (top-to-bottom)
+        sorted_pts = corner_pts[np.argsort(corner_pts[:, 1])]
 
-        # Determine card orientation and assign corners
+        # Step 2: Split into top and bottom pairs
+        top_pts = sorted_pts[:2]
+        bottom_pts = sorted_pts[2:]
+
+        # Step 3: Sort top and bottom pairs by x-coordinate (left-to-right)
+        top_left, top_right = top_pts[np.argsort(top_pts[:, 0])]
+        bot_left, bot_right = bottom_pts[np.argsort(bottom_pts[:, 0])]
+
+        # Step 4: Determine card orientation
         temp_rect = np.zeros((4, 2), dtype="float32")
         if width <= 0.8 * height:  # Vertical orientation
             temp_rect[:] = [top_left, top_right, bot_right, bot_left]
         elif width >= 1.2 * height:  # Horizontal orientation
             temp_rect[:] = [bot_left, top_left, top_right, bot_right]
         else:  # Diamond orientation
-            if corner_pts[1][1] <= corner_pts[3][1]:  # Tilted left
-                temp_rect[:] = [corner_pts[1], corner_pts[0], corner_pts[3], corner_pts[2]]
-            else:  # Tilted right
-                temp_rect[:] = [corner_pts[0], corner_pts[3], corner_pts[2], corner_pts[1]]
+            temp_rect[:] = [top_left, top_right, bot_right, bot_left]  # Maintain consistent order
+
 
         # Define destination points for warping
         dst = np.array([[0, 0], [200, 0], [200, 300], [0, 300]], dtype="float32")
@@ -260,34 +245,13 @@ def process_zoom(zoom_region):
             return None  # No bounding box found
 
 
-def compute_diff_score(zoom1, zoom2):
+def compute_diff_score(image1, image2):
 
-        box1 = process_zoom(zoom1)
-        box2 = process_zoom(zoom2)
-        if box1 is None or box2 is None:
-            return float('inf')  # Return a high score if no bounding box is found
-
-        # Crop the regions of interest using the bounding boxes
-        x1, y1, w1, h1 = box1
-        roi1 = zoom1[y1:y1 + h1, x1:x1 + w1]
-
-        x2, y2, w2, h2 = box2
-        roi2 = zoom2[y2:y2 + h2, x2:x2 + w2]
-
-        # Resize ROIs to a common size for comparison
-        common_size = (100, 100)
-        resized_roi1 = cv2.resize(roi1, common_size, interpolation=cv2.INTER_AREA)
-        resized_roi2 = cv2.resize(roi2, common_size, interpolation=cv2.INTER_AREA)
-
-        # Ensure both are grayscale
-        if len(resized_roi1.shape) == 3:
-            resized_roi1 = cv2.cvtColor(resized_roi1, cv2.COLOR_BGR2GRAY)
-        if len(resized_roi2.shape) == 3:
-            resized_roi2 = cv2.cvtColor(resized_roi2, cv2.COLOR_BGR2GRAY)
-            
-        
+        img1 = Process_image(image1)
+        img2 = Process_image(image2)
+           
         # Compute absolute difference
-        diff = cv2.absdiff(resized_roi1, resized_roi2)
+        diff = cv2.absdiff(img1, img2)
 
        
 
@@ -311,7 +275,7 @@ def Save_Corner(corner, image_name):
 
 
 
-def Match_Corners(cards, image, ranks, suits):
+def Match_Corners(cards, image, templates):
     """
     Matches detected cards with family ranks and suits based on corner similarity.
 
@@ -330,47 +294,34 @@ def Match_Corners(cards, image, ranks, suits):
     # Loop through each detected card
     for card in cards:
         processed_card = Process_Card(card, image)  # Extract card features
-        _, card_rank, card_suit = Get_Card_Corner(processed_card.img)  # Get zoomed-in corner
+        card_img = processed_card.img
         cards_found.append(processed_card)
 
-        best_match_rank = None  # To store the best match for the current card's rank
-        best_match_suit = None  # To store the best match for the current card's suit
-        best_diff_value_rank = float('inf')  # Initialize with a large value for ranks
-        best_diff_value_suit = float('inf')  # Initialize with a large value for suits
+        best_match = None  # To store the best match for the current card's rank
+        
+        best_diff_value = float('inf')  # Initialize with a large value for ranks
+       
 
         # Compare the card corner with each family rank
-        for rank in ranks:
-            rank_img = rank.img
-            if rank_img is None:
+        for template in templates:
+            t_img = template.img
+            if t_img is None:
                 continue
             
             # Use compare_bounding_boxes_absdiff to get absdiff scores
-            absdiff_scores_rank = compute_diff_score(rank_img, card_rank)
+            absdiff_scores = compute_diff_score(t_img, card_img)
 
             # Update the best match if a lower diff value is found
-            if absdiff_scores_rank < best_diff_value_rank:
-                best_diff_value_rank = absdiff_scores_rank
-                best_match_rank = rank.rank
+            if absdiff_scores < best_diff_value:
+                best_diff_value = absdiff_scores
+                best_match = template.rank
 
-        # Compare the card corner with each family suit
-        for suit in suits:
-            suit_img = suit.img
-            if suit_img is None:
-                continue
-
-            # Use compare_bounding_boxes_absdiff to get absdiff scores
-            absdiff_scores_suit = compute_diff_score(suit_img, card_suit)
-
-            # Update the best match if a lower diff value is found
-            if absdiff_scores_suit < best_diff_value_suit:
-                best_diff_value_suit = absdiff_scores_suit
-                best_match_suit = suit.suit
+       
 
         # After checking all family ranks and suits, assign the best matches
-        if best_match_rank is not None:
-            processed_card.rank = best_match_rank
-        if best_match_suit is not None:
-            processed_card.suit = best_match_suit
+        if best_match is not None:
+            processed_card.rank = best_match
+        
 
         matching_cards.append(processed_card)
 
@@ -398,7 +349,13 @@ def draw_results(image, card):
 
     # Write the detected rank near the card
     rank_name = card.rank
-    suit_name = card.suit
-    cv2.putText(image, rank_name + suit_name, (x - 60, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3, cv2.LINE_AA)
+
+    cv2.putText(image, rank_name, (x - 60, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3, cv2.LINE_AA)
 
     return image
+
+
+def Save_template_cards(card, dest_folder,unique_name):
+    filename = os.path.join(dest_folder, f'{unique_name}.jpg')
+    cv2.imwrite(filename, card)
+
