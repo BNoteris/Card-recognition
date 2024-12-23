@@ -405,7 +405,12 @@ def divide_into_zones(frame, scorep1=0, scorep2=0, scorep3=0, scorep4=0):
             zone_center = (mid_x // 2, mid_y // 2) if zones_names[i] == "top_left" else (
                 (mid_x + mid_x // 2, mid_y // 2) if zones_names[i] == "top_right" else (
                     (mid_x // 2, mid_y + mid_y // 2) if zones_names[i] == "bottom_left" else (mid_x + mid_x // 2, mid_y + mid_y // 2)))
-            cv2.putText(frame, "Lost", zone_center, font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
+            cv2.putText(frame, "Bust", zone_center, font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
+        elif score == 21:    
+            zone_center = (mid_x // 2,(mid_y // 2)+50) if zones_names[i] == "top_left" else (
+                (mid_x + mid_x // 2, mid_y // 2+50) if zones_names[i] == "top_right" else (
+                    (mid_x // 2, mid_y + mid_y // 2+50) if zones_names[i] == "bottom_left" else (mid_x + mid_x // 2, mid_y + mid_y // 2+50)))
+            cv2.putText(frame, "blackjack!", zone_center, font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
 
     # Add "winning" text to the winning zone
     if status == "Winning":
