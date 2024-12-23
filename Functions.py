@@ -13,7 +13,7 @@ CARD_MIN_AREA = 10000
 CORNER_WIDTH = 45
 CORNER_HEIGHT = 70
 MATCH_VALUE = 500000
-THRESH_LVL = 160
+THRESH_LVL = 100
 
 class Rank:
     """Structure to store information about family rank images."""
