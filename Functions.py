@@ -9,11 +9,7 @@ from tkinter import font
 # Constants for card size
 CARD_MAX_AREA = 1000000   #Max area size might get really high with the camera view depending on the distance
 CARD_MIN_AREA = 10000
-# Width and height of card corner
-CORNER_WIDTH = 45
-CORNER_HEIGHT = 70
-MATCH_VALUE = 500000
-THRESH_LVL = 140
+THRESH_LVL = 140  # scale to the luminosity of your test environnement
 
 
 class Template:
@@ -67,17 +63,32 @@ class Card:
         self.img = [] # 200x300, flattened, grayed, blurred image
         self.corner = [] # image of the corner of the card
         self.rank = "Unknown"  # Detected rank of the card
-        self.value = 0 # Detected suit of the card
+        self.value = 0 # Detected value of the card
 
 
-def Process_image(image):
+def Process_image(image, isCard = 0):
 
     if len(image.shape) == 3:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     else:
         gray = image
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    retval, thresh = cv2.threshold(blur,THRESH_LVL,255,cv2.THRESH_BINARY)
+
+
+
+
+    height, width = gray.shape
+    x = width // 2  
+    y = height - 7   
+
+    if isCard == 1 :
+        white_pixel_intensity = gray[y, x]
+        dynamic_thresh_lvl = max(white_pixel_intensity - 15, 0)
+        thresh_lvl = dynamic_thresh_lvl
+    else :
+        thresh_lvl = THRESH_LVL
+
+    retval, thresh = cv2.threshold(blur,thresh_lvl,255,cv2.THRESH_BINARY)
     return thresh
 
 def Find_cards(image):
@@ -214,9 +225,9 @@ def Reshape_Card(image, corner_pts, width, height):
 
 def compute_diff_score(image1, image2):
 
-        img1 = Process_image(image1)
-        img2 = Process_image(image2)
-           
+        img1 = Process_image(image1,1)
+        img2 = Process_image(image2,1)
+
         # Compute absolute difference
         diff = cv2.absdiff(img1, img2)
 
