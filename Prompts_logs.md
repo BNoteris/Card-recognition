@@ -32,7 +32,7 @@ o	This clarification can be in the output or a comment.
 4.	Dynamic Rectangle Color:
 o	Using a dynamic color for rectangles instead of hardcoded 255 (white) could improve visual distinction when viewing multiple results. For instance, use:
 python
-Copier le code
+Copier le code  
 color = (255, 0, 0)  // Red rectangle
 cv.rectangle(img, top_left, bottom_right, color, 2)
 5.	Efficiency:
