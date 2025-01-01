@@ -160,8 +160,8 @@ ________________________________________
 Conclusion
 The size of the template directly affects matching outcomes. While larger templates provide more context and are less noise-sensitive, they can be computationally expensive and require careful cropping to avoid irrelevant features. Smaller templates are faster but can be less reliable, especially in noisy or scaled scenarios. Using multi-scale techniques or switching to feature-based methods can help overcome these challenges.
 4o
-  # Vous avez dit :
-   i have a problem of scale dependancy
+# Vous avez dit :
+  i have a problem of scale dependancy
 # Chatgpt a dit :
 ChatGPT
 Scale dependency in template matching is a common challenge because standard template matching methods like cv.matchTemplate do not handle differences in size between the template and the corresponding pattern in the image. Here are approaches and solutions to address scale dependency effectively:
@@ -305,7 +305,7 @@ Conclusion
 For simple cases, use multi-scale template matching or image pyramids. For more robust and scale-invariant detection, prefer feature-based methods like ORB or SIFT. In advanced scenarios, deep learning models provide a comprehensive solution for complex patterns.
 4o
   # Vous avez dit :
- explain cv.rectangle(img,top_left, bottom_right, 800, 2)
+   explain cv.rectangle(img,top_left, bottom_right, 800, 2)
 # Chatgpt a dit :
 ChatGPT
 The cv.rectangle() function in OpenCV is used to draw a rectangle on an image. Let's break down the function call you provided:
@@ -353,7 +353,8 @@ cv.rectangle(img, top_left, bottom_right, 800, 2)
 If the coordinates for top_left are (100, 100) and for bottom_right are (200, 200), this will:
 •	Draw a white rectangle from (100, 100) to (200, 200).
 •	The rectangle's border will be 2 pixels thick.
-je veux créer un programme python capable de reconnaitre les cartes d'un jeu avec opencv
+
+  je veux créer un programme python capable de reconnaitre les cartes d'un jeu avec opencv
 # Chatgpt a dit :
 ChatGPT
 Créer un programme en Python capable de reconnaître les cartes d'un jeu avec OpenCV implique plusieurs étapes. Voici un aperçu des étapes principales et des concepts impliqués :
@@ -455,7 +456,7 @@ ________________________________________
 •	Utilisez des algorithmes avancés comme Deep Learning pour une reconnaissance robuste.
 Si vous avez besoin d'aide pour une étape spécifique, n'hésitez pas à demander ! 😊
 4o
-i got a code to isolate the corner of playing card but when i try to use the cv.absdiff function the corner i got is a little bit on the left of the template corner i have to match it
+  i got a code to isolate the corner of playing card but when i try to use the cv.absdiff function the corner i got is a little bit on the left of the template corner i have to match it
 # Chatgpt a dit :
 ChatGPT
 When using cv.absdiff to isolate the corner of a playing card, if the extracted corner appears misaligned with the template corner, this typically indicates a problem with image alignment or preprocessing. Here are some potential solutions and suggestions to ensure accurate alignment:
@@ -531,7 +532,7 @@ cv2.destroyAllWindows()
 By using these techniques, you should be able to align the extracted corner with the template more precisely, ensuring accurate results from cv.absdiff.
 4o
 
-	i want these functions to be more consistent when processing the same card but in different image def Process_Card(contour, image): """ Extracts relevant features from a card's contour in the image. Args: contour (ndarray): The contour of the card. image (ndarray): The input image. Returns: Card: A Card object with processed attributes. """ card = Card() card.contour = contour // Store the card's contour // Approximate the contour to find corner points peri = cv2.arcLength(contour, True) approx = cv2.approxPolyDP(contour, 0.1 * peri, True) pts = np.float32(approx) card.corner_pts = pts // Calculate the width, height, and center point of the card x, y, w, h = cv2.boundingRect(contour) card.width, card.height = w, h // Compute the center of the card by averaging corner points average = np.sum(pts, axis=0) / len(pts) cent_x = int(average[0][0]) cent_y = int(average[0][1]) card.center = [cent_x, cent_y] // Reshape and transform the card image card.img = Reshape_Card(image, pts, w, h) return card def Reshape_Card(image, corner_pts, width, height): """ Warps the card image into a standard 200x300 size. Args: image (ndarray): The input image. corner_pts (ndarray): Corner points of the card. width (int): Width of the bounding rectangle. height (int): Height of the bounding rectangle. Returns: ndarray: The warped and grayscaled card image. """ // Create temporary rectangle to hold corners of card temp_rect = np.zeros((4,2), dtype = "float32") // sum = np.sum(corner_pts, axis = 2) top_left = corner_pts[np.argmin(sum)] bot_right = corner_pts[np.argmax(sum)] diff = np.diff(corner_pts, axis = -1) top_right = corner_pts[np.argmin(diff)] bot_left = corner_pts[np.argmax(diff)] if width <= 0.8*height: // If card is vertically oriented temp_rect[0] = top_left temp_rect[1] = top_right temp_rect[2] = bot_right temp_rect[3] = bot_left if width >= 1.2*height: // If card is horizontally oriented temp_rect[0] = bot_left temp_rect[1] = top_left temp_rect[2] = top_right temp_rect[3] = bot_right // If the card is 'diamond' oriented, a different algorithm // has to be used to identify which point is top left, top right // bottom left, and bottom right. if width > 0.8*height and width < 1.2*height: //If card is diamond oriented // If furthest left point is higher than furthest right point, // card is tilted to the left. if corner_pts[1][0][1] <= corner_pts[3][0][1]: // If card is titled to the left, approxPolyDP returns points // in this order: top right, top left, bottom left, bottom right temp_rect[0] = corner_pts[1][0] // Top left temp_rect[1] = corner_pts[0][0] // Top right temp_rect[2] = corner_pts[3][0] // Bottom right temp_rect[3] = corner_pts[2][0] // Bottom left // If furthest left point is lower than furthest right point, // card is tilted to the right if corner_pts[1][0][1] > corner_pts[3][0][1]: // If card is titled to the right, approxPolyDP returns points // in this order: top left, bottom left, bottom right, top right temp_rect[0] = corner_pts[0][0] // Top left temp_rect[1] = corner_pts[3][0] // Top right temp_rect[2] = corner_pts[2][0] // Bottom right temp_rect[3] = corner_pts[1][0] // Bottom left maxWidth = 200 maxHeight = 300 // Create destination array, calculate perspective transform matrix, // and warp card image dst = np.array([[0,0],[maxWidth-1,0],[maxWidth-1,maxHeight-1],[0, maxHeight-1]], np.float32) M = cv2.getPerspectiveTransform(temp_rect,dst) warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight)) warp = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY)
+	  i want these functions to be more consistent when processing the same card but in different image def Process_Card(contour, image): """ Extracts relevant features from a card's contour in the image. Args: contour (ndarray): The contour of the card. image (ndarray): The input image. Returns: Card: A Card object with processed attributes. """ card = Card() card.contour = contour // Store the card's contour // Approximate the contour to find corner points peri = cv2.arcLength(contour, True) approx = cv2.approxPolyDP(contour, 0.1 * peri, True) pts = np.float32(approx) card.corner_pts = pts // Calculate the width, height, and center point of the card x, y, w, h = cv2.boundingRect(contour) card.width, card.height = w, h // Compute the center of the card by averaging corner points average = np.sum(pts, axis=0) / len(pts) cent_x = int(average[0][0]) cent_y = int(average[0][1]) card.center = [cent_x, cent_y] // Reshape and transform the card image card.img = Reshape_Card(image, pts, w, h) return card def Reshape_Card(image, corner_pts, width, height): """ Warps the card image into a standard 200x300 size. Args: image (ndarray): The input image. corner_pts (ndarray): Corner points of the card. width (int): Width of the bounding rectangle. height (int): Height of the bounding rectangle. Returns: ndarray: The warped and grayscaled card image. """ // Create temporary rectangle to hold corners of card temp_rect = np.zeros((4,2), dtype = "float32") // sum = np.sum(corner_pts, axis = 2) top_left = corner_pts[np.argmin(sum)] bot_right = corner_pts[np.argmax(sum)] diff = np.diff(corner_pts, axis = -1) top_right = corner_pts[np.argmin(diff)] bot_left = corner_pts[np.argmax(diff)] if width <= 0.8*height: // If card is vertically oriented temp_rect[0] = top_left temp_rect[1] = top_right temp_rect[2] = bot_right temp_rect[3] = bot_left if width >= 1.2*height: // If card is horizontally oriented temp_rect[0] = bot_left temp_rect[1] = top_left temp_rect[2] = top_right temp_rect[3] = bot_right // If the card is 'diamond' oriented, a different algorithm // has to be used to identify which point is top left, top right // bottom left, and bottom right. if width > 0.8*height and width < 1.2*height: //If card is diamond oriented // If furthest left point is higher than furthest right point, // card is tilted to the left. if corner_pts[1][0][1] <= corner_pts[3][0][1]: // If card is titled to the left, approxPolyDP returns points // in this order: top right, top left, bottom left, bottom right temp_rect[0] = corner_pts[1][0] // Top left temp_rect[1] = corner_pts[0][0] // Top right temp_rect[2] = corner_pts[3][0] // Bottom right temp_rect[3] = corner_pts[2][0] // Bottom left // If furthest left point is lower than furthest right point, // card is tilted to the right if corner_pts[1][0][1] > corner_pts[3][0][1]: // If card is titled to the right, approxPolyDP returns points // in this order: top left, bottom left, bottom right, top right temp_rect[0] = corner_pts[0][0] // Top left temp_rect[1] = corner_pts[3][0] // Top right temp_rect[2] = corner_pts[2][0] // Bottom right temp_rect[3] = corner_pts[1][0] // Bottom left maxWidth = 200 maxHeight = 300 // Create destination array, calculate perspective transform matrix, // and warp card image dst = np.array([[0,0],[maxWidth-1,0],[maxWidth-1,maxHeight-1],[0, maxHeight-1]], np.float32) M = cv2.getPerspectiveTransform(temp_rect,dst) warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight)) warp = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY)
 # Chatgpt a dit :
 ChatGPT
 To make the Process_Card and Reshape_Card functions more consistent when processing the same card across different images, we can address key issues that may cause inconsistencies:
@@ -651,7 +652,7 @@ With these improvements, the functions should produce consistent results even wi
 Partager
  
   # Vous avez dit :
- i don't want to restart kernel each time i change something in my py file from Functions import *
+   i don't want to restart kernel each time i change something in my py file from Functions import *
 # Chatgpt a dit :
 ChatGPT
 When working on a project where you're importing functions from a Python file, you don't need to restart the kernel every time you make a change. Instead, you can use the importlib.reload function to reload the module dynamically. Here's how you can do it:
@@ -680,7 +681,7 @@ Notes:
 This approach saves time and avoids unnecessary kernel restarts.
 4o
   # Vous avez dit :
- for i, card in enumerate(families): result_image = families[i].img plt.imshow(result_image) plt.title('Test') plt.show()
+    for i, card in enumerate(families): result_image = families[i].img plt.imshow(result_image) plt.title('Test') plt.show()
 # Chatgpt a dit :
 ChatGPT
 Your code snippet appears to be iterating through a list of families objects and displaying an image (img) attribute of each object. However, there are a few points to ensure this works correctly:
@@ -727,7 +728,7 @@ Key Points:
 •	Use plt.axis('off') to remove axes for a cleaner display.
 •	When dealing with multiple images, plt.subplots organizes them neatly instead of displaying them one at a time.
 Let me know if you need further adjustments!
-def Find_cards(image): """ Detects cards in the provided image by finding valid contours. Args: image (ndarray): The input image. Returns: tuple: A list of valid contours and a copy of the image with contours drawn. """ // Convert the image to grayscale gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) // Apply edge detection to find edges in the image edges = cv2.Canny(gray, 50, 150) // Find contours and their hierarchy contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) valid_contours = [] // List to store valid card contours output_image = image.copy() // Copy of the input image for drawing contours // Return early if no contours are found if len(contours) == 0: return valid_contours, output_image for i, contour in enumerate(contours): size = cv2.contourArea(contour) // Calculate contour area if not (CARD_MIN_AREA < size < CARD_MAX_AREA): // Check if area is within valid range continue // Approximate the contour to a polygon peri = cv2.arcLength(contour, True) approx = cv2.approxPolyDP(contour, 0.1 * peri, True) // Only consider quadrilateral contours that are not nested if len(approx) == 4 and hierarchy[0][i][3] == -1 : valid_contours.append(contour) // Draw the valid contour on the output image cv2.drawContours(output_image, [contours[i]], -1, (0, 255, 0), 3) return valid_contours, output_image def Process_Card(contour, image): """ Extracts relevant features from a card's contour in the image. Args: contour (ndarray): The contour of the card. image (ndarray): The input image. Returns: Card: A Card object with processed attributes. """ card = Card() card.contour = contour // Store the card's contour // Approximate the contour to find corner points peri = cv2.arcLength(contour, True) approx = cv2.approxPolyDP(contour, 0.1 * peri, True) pts = np.float32(approx) card.corner_pts = pts // Calculate the width, height, and center point of the card x, y, w, h = cv2.boundingRect(contour) card.width, card.height = w, h // Compute the center of the card by averaging corner points average = np.sum(pts, axis=0) / len(pts) cent_x = int(average[0][0]) cent_y = int(average[0][1]) card.center = [cent_x, cent_y] // Reshape and transform the card image card.img = Reshape_Card(image, pts, w, h) return card def Reshape_Card(image, corner_pts, width, height): """ Warps the card image into a standard 200x300 size. Args: image (ndarray): The input image. corner_pts (ndarray): Corner points of the card. width (int): Width of the bounding rectangle. height (int): Height of the bounding rectangle. Returns: ndarray: The warped and grayscaled card image. """ // Create temporary rectangle to hold corners of card temp_rect = np.zeros((4,2), dtype = "float32") // sum = np.sum(corner_pts, axis = 2) top_left = corner_pts[np.argmin(sum)] bot_right = corner_pts[np.argmax(sum)] diff = np.diff(corner_pts, axis = -1) top_right = corner_pts[np.argmin(diff)] bot_left = corner_pts[np.argmax(diff)] if width <= 0.8*height: // If card is vertically oriented temp_rect[0] = top_left temp_rect[1] = top_right temp_rect[2] = bot_right temp_rect[3] = bot_left if width >= 1.2*height: // If card is horizontally oriented temp_rect[0] = bot_left temp_rect[1] = top_left temp_rect[2] = top_right temp_rect[3] = bot_right // If the card is 'diamond' oriented, a different algorithm // has to be used to identify which point is top left, top right // bottom left, and bottom right. if width > 0.8*height and width < 1.2*height: //If card is diamond oriented // If furthest left point is higher than furthest right point, // card is tilted to the left. if corner_pts[1][0][1] <= corner_pts[3][0][1]: // If card is titled to the left, approxPolyDP returns points // in this order: top right, top left, bottom left, bottom right temp_rect[0] = corner_pts[1][0] // Top left temp_rect[1] = corner_pts[0][0] // Top right temp_rect[2] = corner_pts[3][0] // Bottom right temp_rect[3] = corner_pts[2][0] // Bottom left // If furthest left point is lower than furthest right point, // card is tilted to the right if corner_pts[1][0][1] > corner_pts[3][0][1]: // If card is titled to the right, approxPolyDP returns points // in this order: top left, bottom left, bottom right, top right temp_rect[0] = corner_pts[0][0] // Top left temp_rect[1] = corner_pts[3][0] // Top right temp_rect[2] = corner_pts[2][0] // Bottom right temp_rect[3] = corner_pts[1][0] // Bottom left maxWidth = 200 maxHeight = 300 // Create destination array, calculate perspective transform matrix, // and warp card image dst = np.array([[0,0],[maxWidth-1,0],[maxWidth-1,maxHeight-1],[0, maxHeight-1]], np.float32) M = cv2.getPerspectiveTransform(temp_rect,dst) warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight)) warp = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY) return warp these are 3 functions i use to find cards on a table but the probleme is that the cards are a little bit rounded on each corner so i'm not sure that if the cards are not perfectly straight it will correctly reshape them
+  def Find_cards(image): """ Detects cards in the provided image by finding valid contours. Args: image (ndarray): The input image. Returns: tuple: A list of valid contours and a copy of the image with contours drawn. """ // Convert the image to grayscale gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) // Apply edge detection to find edges in the image edges = cv2.Canny(gray, 50, 150) // Find contours and their hierarchy contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) valid_contours = [] // List to store valid card contours output_image = image.copy() // Copy of the input image for drawing contours // Return early if no contours are found if len(contours) == 0: return valid_contours, output_image for i, contour in enumerate(contours): size = cv2.contourArea(contour) // Calculate contour area if not (CARD_MIN_AREA < size < CARD_MAX_AREA): // Check if area is within valid range continue // Approximate the contour to a polygon peri = cv2.arcLength(contour, True) approx = cv2.approxPolyDP(contour, 0.1 * peri, True) // Only consider quadrilateral contours that are not nested if len(approx) == 4 and hierarchy[0][i][3] == -1 : valid_contours.append(contour) // Draw the valid contour on the output image cv2.drawContours(output_image, [contours[i]], -1, (0, 255, 0), 3) return valid_contours, output_image def Process_Card(contour, image): """ Extracts relevant features from a card's contour in the image. Args: contour (ndarray): The contour of the card. image (ndarray): The input image. Returns: Card: A Card object with processed attributes. """ card = Card() card.contour = contour // Store the card's contour // Approximate the contour to find corner points peri = cv2.arcLength(contour, True) approx = cv2.approxPolyDP(contour, 0.1 * peri, True) pts = np.float32(approx) card.corner_pts = pts // Calculate the width,   height, and center point of the card x, y, w, h = cv2.boundingRect(contour) card.width, card.height = w, h // Compute the center of the card by averaging corner points average = np.sum(pts, axis=0) / len(pts) cent_x = int(average[0][0]) cent_y = int(average[0][1]) card.center = [cent_x, cent_y] // Reshape and transform the card image card.img = Reshape_Card(image, pts, w, h) return card def Reshape_Card(image, corner_pts, width, height): """ Warps the card image into a standard 200x300 size. Args: image (ndarray): The input image. corner_pts (ndarray): Corner points of the card. width (int): Width of the bounding rectangle. height (int): Height of the bounding rectangle. Returns: ndarray: The warped and grayscaled card image. """ // Create temporary rectangle to hold corners of card temp_rect = np.zeros((4,2), dtype = "float32") // sum = np.sum(corner_pts, axis = 2) top_left = corner_pts[np.argmin(sum)] bot_right = corner_pts[np.argmax(sum)] diff = np.diff(corner_pts, axis = -1) top_right = corner_pts[np.argmin(diff)] bot_left = corner_pts[np.argmax(diff)] if width <= 0.8*height: // If card is vertically oriented temp_rect[0] = top_left temp_rect[1] = top_right temp_rect[2] = bot_right temp_rect[3] = bot_left if width >= 1.2*height: // If card is horizontally oriented temp_rect[0] = bot_left temp_rect[1] = top_left temp_rect[2] = top_right temp_rect[3] = bot_right // If the card is 'diamond' oriented, a different algorithm // has to be used to identify which point is top left, top right // bottom left, and bottom right. if width > 0.8*height and width < 1.2*height: //If card is diamond oriented // If furthest left point is higher than furthest right point, // card is tilted to the left. if corner_pts[1][0][1] <= corner_pts[3][0][1]: // If card is titled to the left, approxPolyDP returns points // in this order: top right, top left, bottom left, bottom right temp_rect[0] = corner_pts[1][0] // Top left temp_rect[1] = corner_pts[0][0] // Top right temp_rect[2] = corner_pts[3][0] // Bottom right temp_rect[3] = corner_pts[2][0] // Bottom left // If furthest left point is lower than furthest right point, // card is tilted to the right if corner_pts[1][0][1] > corner_pts[3][0][1]: // If card is titled to the right, approxPolyDP returns points // in this order: top left, bottom left, bottom right, top right temp_rect[0] = corner_pts[0][0] // Top left temp_rect[1] = corner_pts[3][0] // Top right temp_rect[2] = corner_pts[2][0] // Bottom right temp_rect[3] = corner_pts[1][0] // Bottom left maxWidth = 200 maxHeight = 300 // Create destination array, calculate perspective transform matrix, // and warp card image dst = np.array([[0,0],[maxWidth-1,0],[maxWidth-1,maxHeight-1],[0, maxHeight-1]], np.float32) M = cv2.getPerspectiveTransform(temp_rect,dst) warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight)) warp = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY) return warp these are 3 functions i use to find cards on a table but the probleme is that the cards are a little bit rounded on each corner so i'm not sure that if the cards are not perfectly straight it will correctly reshape them
 # Chatgpt a dit :
 ChatGPT
 You're correct that cards with rounded corners or slightly imperfect quadrilateral shapes can cause issues in accurately detecting and reshaping them. Here are some strategies to improve the robustness of your card detection and reshaping:
@@ -794,7 +795,7 @@ Debugging and Visualization
 This approach should make your card detection and reshaping more robust to imperfections and variations in card shape.
 4o
   # Vous avez dit :
- how can i implement the convexhull
+   how can i implement the convexhull
 # Chatgpt a dit :
 ChatGPT
 Implementing the convex hull is straightforward with OpenCV's cv2.convexHull function. Here’s how you can integrate it into your card detection pipeline:
@@ -869,7 +870,7 @@ cv2.drawContours(output_image, [contour], -1, (255, 0, 0), 2)  // Original conto
 cv2.drawContours(output_image, [hull], -1, (0, 255, 0), 2)     // Convex hull in green
 This visualization will confirm that the convex hull eliminates concavities and better matches the card's shape.
 
-optimize this function def Reshape_Card(image, corner_pts, width, height): """ Warps the card image into a standard 200x300 size. Args: image (ndarray): The input image. corner_pts (ndarray): Corner points of the card. width (int): Width of the bounding rectangle. height (int): Height of the bounding rectangle. Returns: ndarray: The warped and grayscaled card image. """ // Create temporary rectangle to hold corners of card temp_rect = np.zeros((4,2), dtype = "float32") // sum = np.sum(corner_pts, axis = 2) top_left = corner_pts[np.argmin(sum)] bot_right = corner_pts[np.argmax(sum)] diff = np.diff(corner_pts, axis = -1) top_right = corner_pts[np.argmin(diff)] bot_left = corner_pts[np.argmax(diff)] if width <= 0.8*height: // If card is vertically oriented temp_rect[0] = top_left temp_rect[1] = top_right temp_rect[2] = bot_right temp_rect[3] = bot_left if width >= 1.2*height: // If card is horizontally oriented temp_rect[0] = bot_left temp_rect[1] = top_left temp_rect[2] = top_right temp_rect[3] = bot_right // If the card is 'diamond' oriented, a different algorithm // has to be used to identify which point is top left, top right // bottom left, and bottom right. if width > 0.8*height and width < 1.2*height: //If card is diamond oriented // If furthest left point is higher than furthest right point, // card is tilted to the left. if corner_pts[1][0][1] <= corner_pts[3][0][1]: // If card is titled to the left, approxPolyDP returns points // in this order: top right, top left, bottom left, bottom right temp_rect[0] = corner_pts[1][0] // Top left temp_rect[1] = corner_pts[0][0] // Top right temp_rect[2] = corner_pts[3][0] // Bottom right temp_rect[3] = corner_pts[2][0] // Bottom left // If furthest left point is lower than furthest right point, // card is tilted to the right if corner_pts[1][0][1] > corner_pts[3][0][1]: // If card is titled to the right, approxPolyDP returns points // in this order: top left, bottom left, bottom right, top right temp_rect[0] = corner_pts[0][0] // Top left temp_rect[1] = corner_pts[3][0] // Top right temp_rect[2] = corner_pts[2][0] // Bottom right temp_rect[3] = corner_pts[1][0] // Bottom left maxWidth = 200 maxHeight = 300 // Create destination array, calculate perspective transform matrix, // and warp card image dst = np.array([[0,0],[maxWidth-1,0],[maxWidth-1,maxHeight-1],[0, maxHeight-1]], np.float32) M = cv2.getPerspectiveTransform(temp_rect,dst) warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight)) warp = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY) return warp 
+  optimize this function def Reshape_Card(image, corner_pts, width, height): """ Warps the card image into a standard 200x300 size. Args: image (ndarray): The input image. corner_pts (ndarray): Corner points of the card. width (int): Width of the bounding rectangle. height (int): Height of the bounding rectangle. Returns: ndarray: The warped and grayscaled card image. """ // Create temporary rectangle to hold corners of card temp_rect = np.zeros((4,2), dtype = "float32") // sum = np.sum(corner_pts, axis = 2) top_left = corner_pts[np.argmin(sum)] bot_right = corner_pts[np.argmax(sum)] diff = np.diff(corner_pts, axis = -1) top_right = corner_pts[np.argmin(diff)] bot_left = corner_pts[np.argmax(diff)] if width <= 0.8*height: // If card is vertically oriented temp_rect[0] = top_left temp_rect[1] = top_right temp_rect[2] = bot_right temp_rect[3] = bot_left if width >= 1.2*height: // If card is horizontally oriented temp_rect[0] = bot_left temp_rect[1] = top_left temp_rect[2] = top_right temp_rect[3] = bot_right // If the card is 'diamond' oriented, a different algorithm // has to be used to identify which point is top left, top right // bottom left, and bottom right. if width > 0.8*height and width < 1.2*height: //If card is diamond oriented // If furthest left point is higher than furthest right point, // card is tilted to the left. if corner_pts[1][0][1] <= corner_pts[3][0][1]: // If card is titled to the left, approxPolyDP returns points // in this order: top right, top left, bottom left, bottom right temp_rect[0] = corner_pts[1][0] // Top left temp_rect[1] = corner_pts[0][0] // Top right temp_rect[2] = corner_pts[3][0] // Bottom right temp_rect[3] = corner_pts[2][0] // Bottom left // If furthest left point is lower than furthest right point, // card is tilted to the right if corner_pts[1][0][1] > corner_pts[3][0][1]: // If card is titled to the right, approxPolyDP returns points // in this order: top left, bottom left, bottom right, top right temp_rect[0] = corner_pts[0][0] // Top left temp_rect[1] = corner_pts[3][0] // Top right temp_rect[2] = corner_pts[2][0] // Bottom right temp_rect[3] = corner_pts[1][0] // Bottom left maxWidth = 200 maxHeight = 300 // Create destination array, calculate perspective transform matrix, // and warp card image dst = np.array([[0,0],[maxWidth-1,0],[maxWidth-1,maxHeight-1],[0, maxHeight-1]], np.float32) M = cv2.getPerspectiveTransform(temp_rect,dst) warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight)) warp = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY) return warp 
 # Chatgpt a dit :
 ChatGPT
 Here is an optimized version of the Reshape_Card function:
@@ -983,7 +984,7 @@ Key Changes:
 This version retains functionality while being leaner and easier to understand.
 4o
   # Vous avez dit :
- the probleme with the last function is that the 4 corner pts are not the correct ones by a little because the cards have slightly rounded corners
+   the probleme with the last function is that the 4 corner pts are not the correct ones by a little because the cards have slightly rounded corners
 # Chatgpt a dit :
 ChatGPT
 The issue with rounded corners causing the corner points to be slightly off can be addressed by ensuring that the approximated polygon captures the correct shape of the card. Here's an updated and optimized version of the Process_Card function that takes into account the rounded corners:
@@ -1054,7 +1055,7 @@ o	Ensured the corner_pts are a valid quadrilateral for accurate perspective tran
 This approach ensures that the extracted corner points are correct, even with slightly rounded card edges.
 4o
   # Vous avez dit :
- adapt this function to go along def Reshape_Card(image, corner_pts, width, height): """ Warps the card image into a standard 200x300 size. Args: image (ndarray): The input image. corner_pts (ndarray): Corner points of the card. width (int): Width of the bounding rectangle. height (int): Height of the bounding rectangle. Returns: ndarray: The warped and grayscaled card image. """ // Calculate sums and differences of corner points sum_pts = np.sum(corner_pts, axis=2) diff_pts = np.diff(corner_pts, axis=-1) // Identify corners based on geometric properties top_left = corner_pts[np.argmin(sum_pts)][0] bot_right = corner_pts[np.argmax(sum_pts)][0] top_right = corner_pts[np.argmin(diff_pts)][0] bot_left = corner_pts[np.argmax(diff_pts)][0] // Determine card orientation and assign corners temp_rect = np.zeros((4, 2), dtype="float32") if width <= 0.8 * height: // Vertical orientation temp_rect[:] = [top_left, top_right, bot_right, bot_left] elif width >= 1.2 * height: // Horizontal orientation temp_rect[:] = [bot_left, top_left, top_right, bot_right] else: // Diamond orientation if corner_pts[1][0][1] <= corner_pts[3][0][1]: // Tilted left temp_rect[:] = [corner_pts[1][0], corner_pts[0][0], corner_pts[3][0], corner_pts[2][0]] else: // Tilted right temp_rect[:] = [corner_pts[0][0], corner_pts[3][0], corner_pts[2][0], corner_pts[1][0]] // Define destination points for warping dst = np.array([[0, 0], [199, 0], [199, 299], [0, 299]], dtype="float32") // Perform perspective transformation and grayscale conversion M = cv2.getPerspectiveTransform(temp_rect, dst) warp = cv2.warpPerspective(image, M, (200, 300)) return cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
+   adapt this function to go along def Reshape_Card(image, corner_pts, width, height): """ Warps the card image into a standard 200x300 size. Args: image (ndarray): The input image. corner_pts (ndarray): Corner points of the card. width (int): Width of the bounding rectangle. height (int): Height of the bounding rectangle. Returns: ndarray: The warped and grayscaled card image. """ // Calculate sums and differences of corner points sum_pts = np.sum(corner_pts, axis=2) diff_pts = np.diff(corner_pts, axis=-1) // Identify corners based on geometric properties top_left = corner_pts[np.argmin(sum_pts)][0] bot_right = corner_pts[np.argmax(sum_pts)][0] top_right = corner_pts[np.argmin  (diff_pts)][0] bot_left = corner_pts[np.argmax(diff_pts)][0] // Determine card orientation and assign corners temp_rect = np.zeros((4, 2), dtype="float32") if width <= 0.8 * height: // Vertical orientation temp_rect[:] = [top_left, top_right, bot_right, bot_left] elif width >= 1.2 * height: // Horizontal orientation temp_rect[:] = [bot_left, top_left, top_right, bot_right] else: // Diamond orientation if corner_pts[1][0][1] <= corner_pts[3][0][1]: // Tilted left temp_rect[:] = [corner_pts[1][0], corner_pts[0][0], corner_pts[3][0], corner_pts[2][0]] else: // Tilted right temp_rect[:] = [corner_pts[0][0], corner_pts[3][0], corner_pts[2][0], corner_pts[1][0]] // Define destination points for warping dst = np.array([[0, 0], [199, 0], [199, 299], [0, 299]], dtype="float32") // Perform perspective transformation and grayscale conversion M = cv2.getPerspectiveTransform(temp_rect, dst) warp = cv2.warpPerspective(image, M, (200, 300)) return cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
 # Chatgpt a dit :
 ChatGPT
 To adapt the Reshape_Card function to align with the updated Process_Card, we can simplify it since the points passed to Reshape_Card (corner_pts) will already be sorted and normalized by Process_Card. Therefore, the orientation and sorting checks are no longer needed.
@@ -1099,13 +1100,13 @@ Benefits:
 •	By ensuring separation of concerns, each function is easier to maintain and adapt.
 4o
  # Vous avez dit :
-other subject
+  other subject
 # Chatgpt a dit :
 ChatGPT
 Sure! What topic would you like to discuss or explore? It could be about coding, science, technology, personal development, or anything else you're curious about. Let me know! 😊
 4o
  # Vous avez dit :
-def Get_Card_Corner(card_reshaped): """ Extracts and zooms in on the corner of the reshaped card image. Args: card_reshaped (ndarray): Warped card image of size 200x300. Returns: ndarray: The zoomed-in corner of the card. """ // Extract the top-left corner of the card image card_corner = card_reshaped[0:CORNER_HEIGHT, 0:CORNER_WIDTH] // Perform a 4x zoom on the corner card_corner_zoom = cv2.resize(card_corner, (0, 0), fx=4, fy=4) // Find rank contour and bounding rectangle, isolate and find largest contour family_contours, hier = cv2.findContours(card_corner_zoom, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) family_contours = sorted(family_contours, key=cv2.contourArea,reverse=True) if len(family_contours) != 0: x1,y1,w1,h1 = cv2.boundingRect(family_contours[0]) Qrank_roi = family_contours[y1:y1+h1, x1:x1+w1] corner_resized = cv2.resize(Qrank_roi, (CORNER_WIDTH,CORNER_HEIGHT), 0, 0) return corner_resized
+  def Get_Card_Corner(card_reshaped): """ Extracts and zooms in on the corner of the reshaped card image. Args: card_reshaped (ndarray): Warped card image of size 200x300. Returns: ndarray: The zoomed-in corner of the card. """ // Extract the top-left corner of the card image card_corner = card_reshaped[0:CORNER_HEIGHT, 0:CORNER_WIDTH] // Perform a 4x zoom on the corner card_corner_zoom = cv2.resize(card_corner, (0, 0), fx=4, fy=4) // Find rank contour and bounding rectangle, isolate and find largest contour family_contours, hier = cv2.findContours(card_corner_zoom, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) family_contours = sorted(family_contours, key=cv2.contourArea,reverse=True) if len(family_contours) != 0: x1,y1,w1,h1 = cv2.boundingRect(family_contours[0]) Qrank_roi = family_contours[y1:y1+h1, x1:x1+w1] corner_resized = cv2.resize(Qrank_roi, (CORNER_WIDTH,CORNER_HEIGHT), 0, 0) return corner_resized
 # Chatgpt a dit :
 ChatGPT
 The Get_Card_Corner function has some issues and opportunities for improvement:
@@ -1178,7 +1179,7 @@ else:
 This optimized function is more robust, easier to debug, and handles edge cases gracefully.
 4o
  # Vous avez dit :
-ok le but de cette fonction est de prendre l'image d'une carte, de faire un zoom sur son coin supérieur gauche. Ensuite trouver les 2 plus gros contours qui devraient correspondre au rang et à la famille de la carte et de réeffectuer un zoom sur un rectangle comprenant ces 2 contours et enfin que la fonction renvoie l'image d ce rectangle
+  ok le but de cette fonction est de prendre l'image d'une carte, de faire un zoom sur son coin supérieur gauche. Ensuite trouver les 2 plus gros contours qui devraient correspondre au rang et à la famille de la carte et de réeffectuer un zoom sur un rectangle comprenant ces 2 contours et enfin que la fonction renvoie l'image d ce rectangle
 # Chatgpt a dit :
 ChatGPT
 Pour répondre à cet objectif, nous allons modifier la fonction pour :
@@ -1269,48 +1270,48 @@ else:
 Cette version assure que le rectangle englobant contient les deux éléments clés (rang et famille) et les met en valeur de manière standardisée.
 
 
-complete this function to draw the bounding rectangle on the output image but for the 2 largest contours
-import cv2
-import numpy as np
+  complete this function to draw the bounding rectangle on the output image but for the 2 largest contours
+    import cv2
+    import numpy as np
 
-// Charger l'image
-image = cv2.imread('Corners/10D.jpg', cv2.IMREAD_COLOR)
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    // Charger l'image
+    image = cv2.imread('Corners/10D.jpg', cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-// Appliquer un flou et détecter les bords
-blur = cv2.GaussianBlur(gray, (5, 5), 0)
-edges = cv2.Canny(blur, 50, 100)
-kernel = np.ones((4, 4))
-dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    // Appliquer un flou et détecter les bords
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blur, 50, 100)
+    kernel = np.ones((4, 4))
+    dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-// Trouver les contours
-contours, hierarchy = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-sorted_contours = sorted(contours,key = len,reverse= True )
-// Dimensions de l'image
-h, w = edges.shape
-
-
+    // Trouver les contours
+    contours, hierarchy = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    sorted_contours = sorted(contours,key = len,reverse= True )
+    // Dimensions de l'image
+    h, w = edges.shape
 
 
 
-// Placer chaque contour les uns au-dessus des autres
-for contour in sorted_contours:
-    // Calculer la boîte englobante du contour
-    x, y, contour_width, contour_height = cv2.boundingRect(contour)
-
-    // Créer un masque pour le contour
-    mask = np.zeros_like(edges)
-    cv2.drawContours(mask, [contour], -1, 255, thickness=-1)
 
 
+    // Placer chaque contour les uns au-dessus des autres
+    for contour in sorted_contours:
+        // Calculer la boîte englobante du contour
+        x, y, contour_width, contour_height = cv2.boundingRect(contour)
 
-// Afficher les résultats
-plt.imshow(output)
-plt.title('Test')
-plt.show()
-plt.imshow(image)
-plt.title('Test')
-plt.show()
+        // Créer un masque pour le contour
+        mask = np.zeros_like(edges)
+        cv2.drawContours(mask, [contour], -1, 255, thickness=-1)
+
+
+
+    // Afficher les résultats
+    plt.imshow(output)
+    plt.title('Test')
+    plt.show()
+    plt.imshow(image)
+    plt.title('Test')
+    plt.show()
 # Chatgpt a dit :
 ChatGPT
 To modify your code to draw the bounding rectangles for the two largest contours, update it as follows:
@@ -1358,7 +1359,7 @@ Let me know if you need further clarification!
 
 
  # Vous avez dit :
-starting from this exact function i now want compare the inside of these bounding rectangle with the bounding rectangles of another image
+    starting from this exact function i now want compare the inside of these bounding rectangle with the bounding rectangles of another image
 # Chatgpt a dit :
 ChatGPT
 To compare the inside of the bounding rectangles of two images, we can extract the regions of interest (ROIs) defined by the bounding rectangles for each image and then compute a similarity metric. Here's how you can achieve this step by step:
@@ -1447,7 +1448,7 @@ The script prints similarity scores for the pairs of bounding rectangles. These 
 
 
  # Vous avez dit :
-do the comparaison with the function absdiff
+    do the comparaison with the function absdiff
 # Chatgpt a dit :
 ChatGPT
 To compare the bounding rectangles using the cv2.absdiff function, we'll compute the absolute difference between the corresponding regions of interest (ROIs) in the two images. This method provides a pixel-wise difference, which can then be summed or averaged to quantify the similarity.
@@ -1824,51 +1825,51 @@ Let me know if you need additional clarifications or modifications!
 
 
  # Vous avez dit :
-10
+    10
 
 
 
 
----------------------------------------------------------------------------
-error                                     Traceback (most recent call last)
-Cell In[280], line 13
-     10 corner_match = cv2.imread('Corners/8D.jpg')
-     11 corner_match_gray = cv2.cvtColor(corner_match, cv2.COLOR_BGR2GRAY)
----> 13 diff = cv2.absdiff( card_corner_zoom, corner_match_gray)
-     14 print(np.sum(diff))
-     15 plt.imshow(diff, cmap='gray')
+    ---------------------------------------------------------------------------
+    error                                     Traceback (most recent call last)
+    Cell In[280], line 13
+        10 corner_match = cv2.imread('Corners/8D.jpg')
+        11 corner_match_gray = cv2.cvtColor(corner_match, cv2.COLOR_BGR2GRAY)
+    ---> 13 diff = cv2.absdiff( card_corner_zoom, corner_match_gray)
+        14 print(np.sum(diff))
+        15 plt.imshow(diff, cmap='gray')
 
-error: OpenCV(4.10.0) D:\a\opencv-python\opencv-python\opencv\modules\core\src\arithm.cpp:661: error: (-209:Sizes of input arguments do not match) The operation is neither 'array op array' (where arrays have the same size and the same number of channels), nor 'array op scalar', nor 'scalar op array' in function 'cv::arithm_op'
-10
----------------------------------------------------------------------------
-error                                     Traceback (most recent call last)
-Cell In[78], line 15
-     12 cards_contours, output = Find_cards(image)
-     13 print(len(cards_contours))
----> 15 matching_cards, cards_found = Match_Corners(cards_contours, image , families)
-     17 print(len(cards_found))
-     18 print(len(matching_cards))
+    error: OpenCV(4.10.0) D:\a\opencv-python\opencv-python\opencv\modules\core\src\arithm.cpp:661: error: (-209:Sizes of input arguments do not match) The operation is neither 'array op array' (where arrays have the same size and the same number of channels), nor 'array op scalar', nor 'scalar op array' in function 'cv::arithm_op'
+    10
+    ---------------------------------------------------------------------------
+    error                                     Traceback (most recent call last)
+    Cell In[78], line 15
+        12 cards_contours, output = Find_cards(image)
+        13 print(len(cards_contours))
+    ---> 15 matching_cards, cards_found = Match_Corners(cards_contours, image , families)
+        17 print(len(cards_found))
+        18 print(len(matching_cards))
 
-File d:\Ecam\4MEO\Computer vision\Labo 4\Functions.py:366, in Match_Corners(cards, image, family)
-    363     continue
-    365 // Use compare_bounding_boxes_absdiff to get absdiff scores
---> 366 absdiff_scores = compare_bounding_boxes_absdiff(family_img, card_corner_zoom)
-    368 // Skip if scores exceed the match threshold
-    369 if absdiff_scores[0] >= MATCH_VALUE or absdiff_scores[1] >= MATCH_VALUE:
+    File d:\Ecam\4MEO\Computer vision\Labo 4\Functions.py:366, in Match_Corners(cards, image, family)
+        363     continue
+        365 // Use compare_bounding_boxes_absdiff to get absdiff scores
+    --> 366 absdiff_scores = compare_bounding_boxes_absdiff(family_img, card_corner_zoom)
+        368 // Skip if scores exceed the match threshold
+        369 if absdiff_scores[0] >= MATCH_VALUE or absdiff_scores[1] >= MATCH_VALUE:
 
-File d:\Ecam\4MEO\Computer vision\Labo 4\Functions.py:276, in compare_bounding_boxes_absdiff(image1, image2)
-    273 def compare_bounding_boxes_absdiff(image1, image2):
-    274     // Get the bounding boxes for both images
-    275     image1, boxes1 = get_top_bounding_boxes(image1)
---> 276     image2, boxes2 = get_top_bounding_boxes(image2)
-    278     absdiff_scores = []
-    279     for (x1, y1, w1, h1), (x2, y2, w2, h2) in zip(boxes1, boxes2):
-    280         // Crop the ROIs
-...
-> Invalid number of channels in input image:
->     'VScn::contains(scn)'
-> where
->     'scn' is 1
+    File d:\Ecam\4MEO\Computer vision\Labo 4\Functions.py:276, in compare_bounding_boxes_absdiff(image1, image2)
+        273 def compare_bounding_boxes_absdiff(image1, image2):
+        274     // Get the bounding boxes for both images
+        275     image1, boxes1 = get_top_bounding_boxes(image1)
+    --> 276     image2, boxes2 = get_top_bounding_boxes(image2)
+        278     absdiff_scores = []
+        279     for (x1, y1, w1, h1), (x2, y2, w2, h2) in zip(boxes1, boxes2):
+        280         // Crop the ROIs
+    ...
+    > Invalid number of channels in input image:
+    >     'VScn::contains(scn)'
+    > where
+    >     'scn' is 1
 # Chatgpt a dit :
 ChatGPT
 The error you're encountering indicates that the images being passed to the compare_bounding_boxes_absdiff function have mismatched or incompatible numbers of channels. Specifically, it seems one of the images is grayscale (with 1 channel), while the other might be a color image (with 3 channels).
@@ -1962,36 +1963,36 @@ Copier le code
 print(image1.shape)  // Check if the image is grayscale (should print (height, width))
 print(image2.shape)  // Same here
 Let me know if this helps or if you need further adjustments!
-sometemis the 2 contour i want to isolate are inside another contour that i don't want
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+    sometemis the 2 contour i want to isolate are inside another contour that i don't want
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-// Charger l'image
-image = cv2.imread('Corners/JH.jpg', cv2.IMREAD_COLOR)
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    // Charger l'image
+    image = cv2.imread('Corners/JH.jpg', cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-// Appliquer un flou et détecter les bords
-blur = cv2.GaussianBlur(gray, (5, 5), 0)
-edges = cv2.Canny(blur, 50, 100)
-kernel = np.ones((4, 4))
-dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    // Appliquer un flou et détecter les bords
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blur, 50, 100)
+    kernel = np.ones((4, 4))
+    dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-// Trouver les contours
-contours, hierarchy = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Trier par aire de contour
+    // Trouver les contours
+    contours, hierarchy = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Trier par aire de contour
 
-// Dessiner les boîtes englobantes pour les 2 plus grands contours
-output = image.copy()
-for contour in sorted_contours[:3]:  // Les 2 plus grands contours
-    x, y, contour_width, contour_height = cv2.boundingRect(contour)
-    cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)  // Vert, épaisseur de 2
+    // Dessiner les boîtes englobantes pour les 2 plus grands contours
+    output = image.copy()
+    for contour in sorted_contours[:3]:  // Les 2 plus grands contours
+        x, y, contour_width, contour_height = cv2.boundingRect(contour)
+        cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)  // Vert, épaisseur de 2
 
-// Afficher les résultats
-plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
-plt.title('Contours with Bounding Boxes')
-plt.axis('off')
-plt.show()
+    // Afficher les résultats
+    plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+    plt.title('Contours with Bounding Boxes')
+    plt.axis('off')
+    plt.show()
 # Chatgpt a dit :
 ChatGPT
 If you want to isolate two specific contours that might be inside another unwanted contour, you can use the hierarchy information from cv2.findContours. The hierarchy provides information about the nested relationships between contours, such as which contours are parents, children, or siblings.
@@ -2070,7 +2071,7 @@ This code will display the bounding boxes of the two largest contours that satis
 
 
  # Vous avez dit :
-ok the problem is not the parent child because it doesn't register as such
+    ok the problem is not the parent child because it doesn't register as such
 # Chatgpt a dit :
 ChatGPT
 If the nested contours are not marked as parent-child relationships in the hierarchy, you need a different strategy to isolate the contours of interest. One effective approach is to calculate the bounding box or centroid of each contour and determine whether a contour is fully enclosed within another based on geometric relationships.
@@ -2161,58 +2162,58 @@ This approach ensures flexibility even when the hierarchy does not label contour
 
 
  # Vous avez dit :
-modify the function so that if the 2 second largest contours are nested in the bounding rectangle of the biggest contour it use the 2, else just use the first 2
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+    modify the function so that if the 2 second largest contours are nested in the bounding rectangle of the biggest contour it use the 2, else just use the first 2
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-// Load the image
-image = cv2.imread('Corners/QH.jpg', cv2.IMREAD_COLOR)
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    // Load the image
+    image = cv2.imread('Corners/QH.jpg', cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-// Apply Gaussian Blur and detect edges
-blur = cv2.GaussianBlur(gray, (5, 5), 0)
-edges = cv2.Canny(blur, 50, 100)
-kernel = np.ones((4, 4), np.uint8)
-dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    // Apply Gaussian Blur and detect edges
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blur, 50, 100)
+    kernel = np.ones((4, 4), np.uint8)
+    dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-// Find contours
-contours, _ = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
-// Extract bounding boxes and filter contours
-bounding_boxes = [cv2.boundingRect(contour) for contour in sorted][:3]
-filtered_contours = []
+    // Find contours
+    contours, _ = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    // Extract bounding boxes and filter contours
+    bounding_boxes = [cv2.boundingRect(contour) for contour in sorted][:3]
+    filtered_contours = []
 
-for i, box in enumerate(bounding_boxes):
-    x, y, w, h = box
-    is_nested = False
+    for i, box in enumerate(bounding_boxes):
+        x, y, w, h = box
+        is_nested = False
 
-    // Check if the current bounding box is inside another
-    for j, other_box in enumerate(bounding_boxes):
-        if i != j:
-            x2, y2, w2, h2 = other_box
-            if (x > x2 and y > y2 and (x + w) < (x2 + w2) and (y + h) < (y2 + h2)):
-                is_nested = True
-                break
+        // Check if the current bounding box is inside another
+        for j, other_box in enumerate(bounding_boxes):
+            if i != j:
+                x2, y2, w2, h2 = other_box
+                if (x > x2 and y > y2 and (x + w) < (x2 + w2) and (y + h) < (y2 + h2)):
+                    is_nested = True
+                    break
 
-    // Keep contours that are not nested
-    if is_nested:
-        filtered_contours.append(contours[i])
+        // Keep contours that are not nested
+        if is_nested:
+            filtered_contours.append(contours[i])
 
-// Sort the filtered contours by area and select the largest two
-filtered_contours = sorted(filtered_contours, key=cv2.contourArea, reverse=True)[:2]
+    // Sort the filtered contours by area and select the largest two
+    filtered_contours = sorted(filtered_contours, key=cv2.contourArea, reverse=True)[:2]
 
-// Draw bounding boxes for the filtered contours
-output = image.copy()
-for contour in filtered_contours:
-    x, y, contour_width, contour_height = cv2.boundingRect(contour)
-    cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)
+    // Draw bounding boxes for the filtered contours
+    output = image.copy()
+    for contour in filtered_contours:
+        x, y, contour_width, contour_height = cv2.boundingRect(contour)
+        cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)
 
-// Display the result
-plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
-plt.title('Filtered Contours with Bounding Boxes')
-plt.axis('off')
-plt.show()
+    // Display the result
+    plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+    plt.title('Filtered Contours with Bounding Boxes')
+    plt.axis('off')
+    plt.show()
 # Chatgpt a dit :
 ChatGPT
 To implement the logic where the two second-largest contours are used only if they are nested within the bounding rectangle of the largest contour, the code needs to be modified to:
@@ -2299,7 +2300,7 @@ Otherwise, the largest two contours.
 
 
  # Vous avez dit :
-explain rezise function opencv
+    explain rezise function opencv
 # Chatgpt a dit :
 ChatGPT
 The cv2.resize() function in OpenCV is used to resize an image to a specific width and height or scale it by a specified factor. It allows you to enlarge or shrink an image while maintaining or altering its aspect ratio.
@@ -2375,27 +2376,27 @@ Adjusting image sizes for display or storage.
 Scaling images for augmentation in computer vision tasks.
 
 
-ef Load_Ranks(filepath):
-    family_ranks = []
-    ranks = ["A", "2", "3", "4","5",
-             "6", "7", "8", "9", "10",
-             "J", "Q", "K"]
+    ef Load_Ranks(filepath):
+        family_ranks = []
+        ranks = ["A", "2", "3", "4","5",
+                "6", "7", "8", "9", "10",
+                "J", "Q", "K"]
 
-    for rank in ranks:
-        rank_object = Rank()
-        rank_object.rank = rank
-        filename = f"{rank}.jpg"
-        img_path = os.path.join(filepath, filename)
+        for rank in ranks:
+            rank_object = Rank()
+            rank_object.rank = rank
+            filename = f"{rank}.jpg"
+            img_path = os.path.join(filepath, filename)
 
-        // Load image and handle potential errors
-        rank_object.img = cv2.imread(img_path)
-        if rank_object.img is None:
-            print(f"Warning: Image {img_path} could not be loaded.")
+            // Load image and handle potential errors
+            rank_object.img = cv2.imread(img_path)
+            if rank_object.img is None:
+                print(f"Warning: Image {img_path} could not be loaded.")
 
-        family_ranks.append(rank_object)
+            family_ranks.append(rank_object)
 
-    return family_ranks
-Suits = Load_Suits('Ranks/')
+        return family_ranks
+    Suits = Load_Suits('Ranks/')
 
 # Chatgpt a dit :
 ChatGPT
@@ -2446,7 +2447,7 @@ Would you like assistance with defining the Rank class or addressing any of thes
 
 
  # Vous avez dit :
-it doesn't find any image
+    it doesn't find any image
 # Chatgpt a dit :
 ChatGPT
 If the function isn't finding any images, it likely means there's an issue with the file paths or the directory structure. Here's how you can debug and fix this problem:
@@ -2557,20 +2558,20 @@ Let me know if the issue persists, and we can investigate further!
 
 
  # Vous avez dit :
-modify to show the 3 zoom
-importlib.reload(Functions)
-from Functions import *
+    modify to show the 3 zoom
+    importlib.reload(Functions)
+    from Functions import *
 
-image = cv2.imread('Full family/M.jpg')
-cards, output= Find_cards(image)
-card = Process_Card(cards[2], image) //change number here to get another card selected
-card_corner_zoom, rank, suit= Get_Card_Corner(card.img)
+    image = cv2.imread('Full family/M.jpg')
+    cards, output= Find_cards(image)
+    card = Process_Card(cards[2], image) //change number here to get another card selected
+    card_corner_zoom, rank, suit= Get_Card_Corner(card.img)
 
-Save_Corner(card_corner_zoom,'Test')
+    Save_Corner(card_corner_zoom,'Test')
 
-plt.imshow(card_corner_zoom)
-plt.title('Test')
-plt.show()
+    plt.imshow(card_corner_zoom)
+    plt.title('Test')
+    plt.show()
 # Chatgpt a dit :
 ChatGPT
 To display three zoomed-in regions (e.g., corners of cards or specific areas of interest) within the same workflow, we can modify your code to:
@@ -2650,7 +2651,7 @@ Let me know if you need further refinements!
 
 
  # Vous avez dit :
-i meant just to show the card_corner zoom, rank and suit
+    i meant just to show the card_corner zoom, rank and suit
 # Chatgpt a dit :
 ChatGPT
 To display the card corner zoom, rank, and suit for a selected card, you can modify the code to directly include all three in the visualization. Here's an updated version that does this:
@@ -2769,23 +2770,23 @@ Understood. Please describe your new task, and I'll craft a solution tailored to
 
 
  # Vous avez dit :
-generalize this into one function
-Ranks = Load_Ranks('Ranks/')
-Suits = Load_Suits('Suits/')
-imageS = Suits[0].img
-imageR = Ranks[4].img
-r1=process_zoom(imageR)
-s1=process_zoom(imageS)
+    generalize this into one function
+    Ranks = Load_Ranks('Ranks/')
+    Suits = Load_Suits('Suits/')
+    imageS = Suits[0].img
+    imageR = Ranks[4].img
+    r1=process_zoom(imageR)
+    s1=process_zoom(imageS)
 
-image = cv2.imread('Full family/H.jpg')
-cards, output= Find_cards(image)
-card = Process_Card(cards[6], image) 
-card_corner_zoom, rank, suit= Get_Card_Corner(card.img)
-r2 = process_zoom(rank)
-s2 = process_zoom(suit)
+    image = cv2.imread('Full family/H.jpg')
+    cards, output= Find_cards(image)
+    card = Process_Card(cards[6], image) 
+    card_corner_zoom, rank, suit= Get_Card_Corner(card.img)
+    r2 = process_zoom(rank)
+    s2 = process_zoom(suit)
 
-print(compute_diff_score(r1,r2,imageR,rank))
-print(compute_diff_score(s1,s2,imageS,suit))
+    print(compute_diff_score(r1,r2,imageR,rank))
+    print(compute_diff_score(s1,s2,imageS,suit))
 # Chatgpt a dit :
 ChatGPT
 Here’s a generalized function that combines all the steps in your code snippet into a single, reusable function. The function will:
@@ -3085,37 +3086,37 @@ Let me know how you'd like to modify or improve the function further! Would you 
 
 
  # Vous avez dit :
-from this, show what the contours in the bounding rectangles look like
-importlib.reload(Functions)
-from Functions import *
+    from this, show what the contours in the bounding rectangles look like
+    importlib.reload(Functions)
+    from Functions import *
 
-Ranks = Load_Ranks('Ranks/')
-Suits = Load_Suits('Suits/')
-imageS = Suits[0].img
-imageR = Ranks[4].img
+    Ranks = Load_Ranks('Ranks/')
+    Suits = Load_Suits('Suits/')
+    imageS = Suits[0].img
+    imageR = Ranks[4].img
 
 
-image = cv2.imread('Full family/H.jpg')
-cards, output= Find_cards(image)
-card = Process_Card(cards[6], image) 
-card_corner_zoom, rank, suit= Get_Card_Corner(card.img)
+    image = cv2.imread('Full family/H.jpg')
+    cards, output= Find_cards(image)
+    card = Process_Card(cards[6], image) 
+    card_corner_zoom, rank, suit= Get_Card_Corner(card.img)
 
-def process_zoom(zoom_region):
-        // Preprocess the image
-        blur = cv2.GaussianBlur(zoom_region, (5, 5), 0)
-        edges = cv2.Canny(blur, 50, 100)
-        kernel = np.ones((3, 3))
-        dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    def process_zoom(zoom_region):
+            // Preprocess the image
+            blur = cv2.GaussianBlur(zoom_region, (5, 5), 0)
+            edges = cv2.Canny(blur, 50, 100)
+            kernel = np.ones((3, 3))
+            dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-        // Find contours
-        contours, _ = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Sort by contour area
+            // Find contours
+            contours, _ = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Sort by contour area
 
-        // Check if contours exist and return the bounding box
-        if sorted_contours:
-            return cv2.boundingRect(sorted_contours[0])
-        else:
-            return None  // No bounding box found
+            // Check if contours exist and return the bounding box
+            if sorted_contours:
+                return cv2.boundingRect(sorted_contours[0])
+            else:
+                return None  // No bounding box found
 # Chatgpt a dit :
 ChatGPT
 To display the contours inside their bounding rectangles, you can modify the process_zoom function to draw the contours and bounding rectangles on the image. Here’s the updated code to visualize the result:
@@ -3172,12 +3173,12 @@ The cv2.imshow function is used to display the processed image with contours and
 Bounding Box Return:
 
 The function still returns the bounding box of the largest contour, preserving the original functionality.
-explain in details this
-// Preprocess the image
-        blur = cv2.GaussianBlur(zoom_region, (5, 5), 0)
-        edges = cv2.Canny(blur, 50, 100)
-        kernel = np.ones((3, 3))
-        dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    explain in details this
+    // Preprocess the image
+            blur = cv2.GaussianBlur(zoom_region, (5, 5), 0)
+            edges = cv2.Canny(blur, 50, 100)
+            kernel = np.ones((3, 3))
+            dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 # Chatgpt a dit :
 ChatGPT
 This code snippet is part of an image preprocessing pipeline. Let's break it down step by step to explain what each operation does:
@@ -3250,7 +3251,7 @@ This pipeline is often used in computer vision tasks like contour detection or o
 
 
  # Vous avez dit :
-is there a way to fine tune this part
+    is there a way to fine tune this part
 // Resize ROIs to a common size for comparison
         common_size = (100, 100)
         resized_roi1 = cv2.resize(roi1, common_size, interpolation=cv2.INTER_AREA)
@@ -3375,7 +3376,7 @@ Clean and Readable: Improved structure for better readability and maintainabilit
 
 
  # Vous avez dit :
-explain this in details
+    explain this in details
 // Optional: Normalize the difference to enhance contrast
         diff = cv2.normalize(diff, None, 0, 255, cv2.NORM_MINMAX)
 
@@ -3470,7 +3471,7 @@ Thresholding simplifies the representation, making the significant differences m
 
 
  # Vous avez dit :
-upscale an image
+    upscale an image
 # Chatgpt a dit :
 ChatGPT
 Upscaling an image means increasing its dimensions while preserving quality as much as possible. OpenCV provides various methods for resizing images, and advanced methods can improve quality further. Here's how to upscale an image step-by-step:
@@ -3568,45 +3569,45 @@ For high-quality results: Use DNN-based super-resolution or external AI models.
 Maintain Aspect Ratio: Ensure width and height are scaled proportionally to avoid distortion.
 Use Pre-trained Models: Leverage existing AI models for specific use cases like photos, artwork, or animations.
 Let me know if you'd like guidance on setting up any specific upscaling method!
-def draw_results(image, card):
-    """
-    Draws the detected card's rank and center point on the image.
-    
-    Args:
-        image (ndarray): The input image to annotate.
-        card (Card): The Card object containing detected attributes.
-    
-    Returns:
-        ndarray: The annotated image.
-    """
-    // Extract card center coordinates
-    x, y = card.center
-    
-    // Draw a blue circle at the card's center
-    cv2.circle(image, (x, y), radius=25, color=(255, 0, 0), thickness=-1)
+    def draw_results(image, card):
+        """
+        Draws the detected card's rank and center point on the image.
+        
+        Args:
+            image (ndarray): The input image to annotate.
+            card (Card): The Card object containing detected attributes.
+        
+        Returns:
+            ndarray: The annotated image.
+        """
+        // Extract card center coordinates
+        x, y = card.center
+        
+        // Draw a blue circle at the card's center
+        cv2.circle(image, (x, y), radius=25, color=(255, 0, 0), thickness=-1)
 
-    // Write the detected rank near the card
-    rank_name = card.rank
-    suit_name = card.suit
-    cv2.putText(image, rank_name + suit_name, (x - 60, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3, cv2.LINE_AA)
+        // Write the detected rank near the card
+        rank_name = card.rank
+        suit_name = card.suit
+        cv2.putText(image, rank_name + suit_name, (x - 60, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3, cv2.LINE_AA)
 
-    return image
----------------------------------------------------------------------------
-TypeError                                 Traceback (most recent call last)
-Cell In[16], line 15
-     12     matching_cards, cards_found = Match_Corners(cards,image, Ranks, Suits)      
-     13     for i, card in enumerate(cards_found):
----> 15         output = draw_results(image, card)
-     17 cv2.imshow('Detected Cards',output)
-     18 if cv2.waitKey(1) == 27:
+        return image
+    ---------------------------------------------------------------------------
+    TypeError                                 Traceback (most recent call last)
+    Cell In[16], line 15
+        12     matching_cards, cards_found = Match_Corners(cards,image, Ranks, Suits)      
+        13     for i, card in enumerate(cards_found):
+    ---> 15         output = draw_results(image, card)
+        17 cv2.imshow('Detected Cards',output)
+        18 if cv2.waitKey(1) == 27:
 
-File d:\Ecam\4MEO\Computer vision\Labo 4\Functions.py:397, in draw_results(image, card)
-    395 rank_name = card.rank
-    396 suit_name = card.suit
---> 397 cv2.putText(image, rank_name + suit_name, (x - 60, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3, cv2.LINE_AA)
-    399 return image
+    File d:\Ecam\4MEO\Computer vision\Labo 4\Functions.py:397, in draw_results(image, card)
+        395 rank_name = card.rank
+        396 suit_name = card.suit
+    --> 397 cv2.putText(image, rank_name + suit_name, (x - 60, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3, cv2.LINE_AA)
+        399 return image
 
-TypeError: can only concatenate list (not "str") to list
+    TypeError: can only concatenate list (not "str") to list
 # Chatgpt a dit :
 ChatGPT
 The error indicates that you are trying to concatenate a list and a string in the line:
@@ -3673,7 +3674,7 @@ If the issue persists, ensure the Card object has its attributes (rank and suit)
 
 
  # Vous avez dit :
-image = cv2.imread(cv2.cvtColor('Full family/H.jpg',))
+    image = cv2.imread(cv2.cvtColor('Full family/H.jpg',))
 # Chatgpt a dit :
 ChatGPT
 The code snippet you shared contains an issue with the cv2.imread and cv2.cvtColor functions. Specifically:
@@ -3715,86 +3716,86 @@ Ensure the 'Full family/H.jpg' file is in the expected location.
 
 
  # Vous avez dit :
-importlib.reload(Functions)
-from Functions import *
-image = cv2.imread('Full family/H.jpg')
-cards, output= Find_cards(image)
-print(len(cards))
-plt.imshow(cv2.cvtColor(output,cv2.COLOR_BGR2RGB))
-plt.title('Find cards')
-plt.show()
-processed = process_zoom(image)
-plt.imshow(processed)
-plt.title('Test')
-plt.show()
-13
+    importlib.reload(Functions)
+    from Functions import *
+    image = cv2.imread('Full family/H.jpg')
+    cards, output= Find_cards(image)
+    print(len(cards))
+    plt.imshow(cv2.cvtColor(output,cv2.COLOR_BGR2RGB))
+    plt.title('Find cards')
+    plt.show()
+    processed = process_zoom(image)
+    plt.imshow(processed)
+    plt.title('Test')
+    plt.show()
+    13
 
----------------------------------------------------------------------------
-TypeError                                 Traceback (most recent call last)
-Cell In[653], line 10
-      8 plt.show()
-      9 processed = process_zoom(image)
----> 10 plt.imshow(processed)
-     11 plt.title('Test')
-     12 plt.show()
+    ---------------------------------------------------------------------------
+    TypeError                                 Traceback (most recent call last)
+    Cell In[653], line 10
+        8 plt.show()
+        9 processed = process_zoom(image)
+    ---> 10 plt.imshow(processed)
+        11 plt.title('Test')
+        12 plt.show()
 
-File ~\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\matplotlib\pyplot.py:3562, in imshow(X, cmap, norm, aspect, interpolation, alpha, vmin, vmax, origin, extent, interpolation_stage, filternorm, filterrad, resample, url, data, **kwargs)
-   3541 @_copy_docstring_and_deprecators(Axes.imshow)
-   3542 def imshow(
-   3543     X: ArrayLike | PIL.Image.Image,
-   (...)
-   3560     **kwargs,
-   3561 ) -> AxesImage:
--> 3562     __ret = gca().imshow(
-   3563         X,
-   3564         cmap=cmap,
-   3565         norm=norm,
-   3566         aspect=aspect,
-   3567         interpolation=interpolation,
-   3568         alpha=alpha,
-   3569         vmin=vmin,
-   3570         vmax=vmax,
-...
-    701     // - otherwise casting wraps extreme values, hiding outliers and
-    702     // making reliable interpretation impossible.
-    703     high = 255 if np.issubdtype(A.dtype, np.integer) else 1
+    File ~\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\matplotlib\pyplot.py:3562, in imshow(X, cmap, norm, aspect, interpolation, alpha, vmin, vmax, origin, extent, interpolation_stage, filternorm, filterrad, resample, url, data, **kwargs)
+    3541 @_copy_docstring_and_deprecators(Axes.imshow)
+    3542 def imshow(
+    3543     X: ArrayLike | PIL.Image.Image,
+    (...)
+    3560     **kwargs,
+    3561 ) -> AxesImage:
+    -> 3562     __ret = gca().imshow(
+    3563         X,
+    3564         cmap=cmap,
+    3565         norm=norm,
+    3566         aspect=aspect,
+    3567         interpolation=interpolation,
+    3568         alpha=alpha,
+    3569         vmin=vmin,
+    3570         vmax=vmax,
+    ...
+        701     // - otherwise casting wraps extreme values, hiding outliers and
+        702     // making reliable interpretation impossible.
+        703     high = 255 if np.issubdtype(A.dtype, np.integer) else 1
 
-TypeError: Invalid shape (4,) for image data
-Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
+    TypeError: Invalid shape (4,) for image data
+    Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
 
 
----------------------------------------------------------------------------
-TypeError                                 Traceback (most recent call last)
-Cell In[652], line 10
-      8 plt.title('Test')
-      9 plt.show()
----> 10 plt.imshow(processed)
-     11 plt.title('Test')
-     12 plt.show()
+    ---------------------------------------------------------------------------
+    TypeError                                 Traceback (most recent call last)
+    Cell In[652], line 10
+        8 plt.title('Test')
+        9 plt.show()
+    ---> 10 plt.imshow(processed)
+        11 plt.title('Test')
+        12 plt.show()
 
-File ~\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\matplotlib\pyplot.py:3562, in imshow(X, cmap, norm, aspect, interpolation, alpha, vmin, vmax, origin, extent, interpolation_stage, filternorm, filterrad, resample, url, data, **kwargs)
-   3541 @_copy_docstring_and_deprecators(Axes.imshow)
-   3542 def imshow(
-   3543     X: ArrayLike | PIL.Image.Image,
-   (...)
-   3560     **kwargs,
-   3561 ) -> AxesImage:
--> 3562     __ret = gca().imshow(
-   3563         X,
-   3564         cmap=cmap,
-   3565         norm=norm,
-   3566         aspect=aspect,
-   3567         interpolation=interpolation,
-   3568         alpha=alpha,
-   3569         vmin=vmin,
-   3570         vmax=vmax,
-...
-    701     // - otherwise casting wraps extreme values, hiding outliers and
-    702     // making reliable interpretation impossible.
-    703     high = 255 if np.issubdtype(A.dtype, np.integer) else 1
+    File ~\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\matplotlib\pyplot.py:3562, in imshow(X, cmap, norm, aspect, interpolation, alpha, vmin, vmax, origin, extent, interpolation_stage, filternorm, filterrad, resample, url, data, **kwargs)
+    3541 @_copy_docstring_and_deprecators(Axes.imshow)
+    3542 def imshow(
+    3543     X: ArrayLike | PIL.Image.Image,
+    (...)
+    3560     **kwargs,
+    3561 ) -> AxesImage:
+    -> 3562     __ret = gca().imshow(
+    3563         X,
+    3564         cmap=cmap,
+    3565         norm=norm,
+    3566         aspect=aspect,
+    3567         interpolation=interpolation,
+    3568         alpha=alpha,
+    3569         vmin=vmin,
+    3570         vmax=vmax,
+    ...
+        701     // - otherwise casting wraps extreme values, hiding outliers and
+        702     // making reliable interpretation impossible.
+        703     high = 255 if np.issubdtype(A.dtype, np.integer) else 1
 
-TypeError: Invalid shape (4,) for image data
-Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
+    TypeError: Invalid shape (4,) for image data
+    Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
 # Chatgpt a dit :
 ChatGPT
 The error TypeError: Invalid shape (4,) for image data indicates that the processed variable passed to plt.imshow() is not an image with a shape compatible with matplotlib's imshow() function. plt.imshow() expects a 2D (grayscale) or 3D (RGB) array, but instead, processed has a shape of (4,), which is not valid.
