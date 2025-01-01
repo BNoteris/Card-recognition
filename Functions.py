@@ -61,7 +61,6 @@ class Card:
         self.corner_pts = [] # Corner points of card
         self.center = [] # Center point of card
         self.img = [] # 200x300, flattened, grayed, blurred image
-        self.corner = [] # image of the corner of the card
         self.rank = "Unknown"  # Detected rank of the card
         self.value = 0 # Detected value of the card
 
@@ -73,10 +72,7 @@ def Process_image(image, isCard = 0):
     else:
         gray = image
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
-
-
-
-
+    
     height, width = gray.shape
     x = width // 2  
     y = height - 7   
