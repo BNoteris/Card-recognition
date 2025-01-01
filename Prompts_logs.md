@@ -1,4 +1,4 @@
- review import cv2 as cv import numpy as np from matplotlib import pyplot as plt img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE) assert img is not None, "file could not be read, check with os.path.exists()" img2 = img.copy() template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE) assert template is not None, "file could not be read, check with os.path.exists()" w, h = template.shape[::-1]  All the 6 methods for comparison in a list methods = ['TM_CCOEFF', 'TM_CCOEFF_NORMED', 'TM_CCORR', 'TM_CCORR_NORMED', 'TM_SQDIFF', 'TM_SQDIFF_NORMED'] for meth in methods: img = img2.copy() method = getattr(cv, meth)  Apply template Matching res = cv.matchTemplate(img,template,method) min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)  If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum if method in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]: top_left = min_loc else: top_left = max_loc bottom_right = (top_left[0] + w, top_left[1] + h) cv.rectangle(img,top_left, bottom_right, 255, 2) plt.subplot(121),plt.imshow(res,cmap = 'gray') plt.title('Matching Result'), plt.xticks([]), plt.yticks([]) plt.subplot(122),plt.imshow(img,cmap = 'gray') plt.title('Detected Point'), plt.xticks([]), plt.yticks([]) plt.suptitle(meth) plt.show() 
+   review import cv2 as cv import numpy as np from matplotlib import pyplot as plt img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE) assert img is not None, "file could not be read, check with os.path.exists()" img2 = img.copy() template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE) assert template is not None, "file could not be read, check with os.path.exists()" w, h = template.shape[::-1]  All the 6 methods for comparison in a list methods = ['TM_CCOEFF', 'TM_CCOEFF_NORMED', 'TM_CCORR', 'TM_CCORR_NORMED', 'TM_SQDIFF', 'TM_SQDIFF_NORMED'] for meth in methods: img = img2.copy() method = getattr(cv, meth)  Apply template Matching res = cv.matchTemplate(img,template,method) min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)  If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum if method in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]: top_left = min_loc else: top_left = max_loc bottom_right = (top_left[0] + w, top_left[1] + h) cv.rectangle(img,top_left, bottom_right, 255, 2) plt.subplot(121),plt.imshow(res,cmap = 'gray') plt.title('Matching Result'), plt.xticks([]), plt.yticks([]) plt.subplot(122),plt.imshow(img,cmap = 'gray') plt.title('Detected Point'), plt.xticks([]), plt.yticks([]) plt.suptitle(meth) plt.show() 
 
 # Chatgpt a dit :
 ChatGPT
@@ -32,7 +32,7 @@ o	This clarification can be in the output or a comment.
 4.	Dynamic Rectangle Color:
 o	Using a dynamic color for rectangles instead of hardcoded 255 (white) could improve visual distinction when viewing multiple results. For instance, use:
 python
-Copier le code
+Copier le code  
 color = (255, 0, 0)  // Red rectangle
 cv.rectangle(img, top_left, bottom_right, color, 2)
 5.	Efficiency:
@@ -109,7 +109,7 @@ This enhanced version adds file handling, better visuals, and output storage, ma
 4o
 
   # Vous avez dit :
- does the size of the image pattern influences the possibility of pattern matching
+   does the size of the image pattern influences the possibility of pattern matching
 # Chatgpt a dit :
 ChatGPT
 Yes, the size of the image pattern (template) significantly influences the possibility and quality of pattern matching. Here’s how the size impacts the process:
@@ -161,7 +161,7 @@ Conclusion
 The size of the template directly affects matching outcomes. While larger templates provide more context and are less noise-sensitive, they can be computationally expensive and require careful cropping to avoid irrelevant features. Smaller templates are faster but can be less reliable, especially in noisy or scaled scenarios. Using multi-scale techniques or switching to feature-based methods can help overcome these challenges.
 4o
   # Vous avez dit :
- i have a problem of scale dependancy
+   i have a problem of scale dependancy
 # Chatgpt a dit :
 ChatGPT
 Scale dependency in template matching is a common challenge because standard template matching methods like cv.matchTemplate do not handle differences in size between the template and the corresponding pattern in the image. Here are approaches and solutions to address scale dependency effectively:
