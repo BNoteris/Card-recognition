@@ -1,4 +1,4 @@
-  review import cv2 as cv import numpy as np from matplotlib import pyplot as plt img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE) assert img is not None, "file could not be read, check with os.path.exists()" img2 = img.copy() template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE) assert template is not None, "file could not be read, check with os.path.exists()" w, h = template.shape[::-1]  All the 6 methods for comparison in a list methods = ['TM_CCOEFF', 'TM_CCOEFF_NORMED', 'TM_CCORR', 'TM_CCORR_NORMED', 'TM_SQDIFF', 'TM_SQDIFF_NORMED'] for meth in methods: img = img2.copy() method = getattr(cv, meth)  Apply template Matching res = cv.matchTemplate(img,template,method) min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)  If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum if method in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]: top_left = min_loc else: top_left = max_loc bottom_right = (top_left[0] + w, top_left[1] + h) cv.rectangle(img,top_left, bottom_right, 255, 2) plt.subplot(121),plt.imshow(res,cmap = 'gray') plt.title('Matching Result'), plt.xticks([]), plt.yticks([]) plt.subplot(122),plt.imshow(img,cmap = 'gray') plt.title('Detected Point'), plt.xticks([]), plt.yticks([]) plt.suptitle(meth) plt.show() 
+### review import cv2 as cv import numpy as np from matplotlib import pyplot as plt img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE) assert img is not None, "file could not be read, check with os.path.exists()" img2 = img.copy() template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE) assert template is not None, "file could not be read, check with os.path.exists()" w, h = template.shape[::-1]  All the 6 methods for comparison in a list methods = ['TM_CCOEFF', 'TM_CCOEFF_NORMED', 'TM_CCORR', 'TM_CCORR_NORMED', 'TM_SQDIFF', 'TM_SQDIFF_NORMED'] for meth in methods: img = img2.copy() method = getattr(cv, meth)  Apply template Matching res = cv.matchTemplate(img,template,method) min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)  If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum if method in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]: top_left = min_loc else: top_left = max_loc bottom_right = (top_left[0] + w, top_left[1] + h) cv.rectangle(img,top_left, bottom_right, 255, 2) plt.subplot(121),plt.imshow(res,cmap = 'gray') plt.title('Matching Result'), plt.xticks([]), plt.yticks([]) plt.subplot(122),plt.imshow(img,cmap = 'gray') plt.title('Detected Point'), plt.xticks([]), plt.yticks([]) plt.suptitle(meth) plt.show() 
 
 # Chatgpt a dit :
 ChatGPT
@@ -56,60 +56,60 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os
 
-// File paths
-image_path = 'Hand with bg.jpg'
-template_path = 'Clubs.png'
+    // File paths
+    image_path = 'Hand with bg.jpg'
+    template_path = 'Clubs.png'
 
-// Load images
-img = cv.imread(image_path, cv.IMREAD_GRAYSCALE)
-if img is None:
-    raise FileNotFoundError(f"Image file '{image_path}' not found. Check the path.")
-    
-template = cv.imread(template_path, cv.IMREAD_GRAYSCALE)
-if template is None:
-    raise FileNotFoundError(f"Template file '{template_path}' not found. Check the path.")
-    
-w, h = template.shape[::-1]
+    // Load images
+    img = cv.imread(image_path, cv.IMREAD_GRAYSCALE)
+    if img is None:
+        raise FileNotFoundError(f"Image file '{image_path}' not found. Check the path.")
+        
+    template = cv.imread(template_path, cv.IMREAD_GRAYSCALE)
+    if template is None:
+        raise FileNotFoundError(f"Template file '{template_path}' not found. Check the path.")
+        
+    w, h = template.shape[::-1]
 
-// Template matching methods
-methods = ['TM_CCOEFF', 'TM_CCOEFF_NORMED', 'TM_CCORR',
-           'TM_CCORR_NORMED', 'TM_SQDIFF', 'TM_SQDIFF_NORMED']
+    // Template matching methods
+    methods = ['TM_CCOEFF', 'TM_CCOEFF_NORMED', 'TM_CCORR',
+            'TM_CCORR_NORMED', 'TM_SQDIFF', 'TM_SQDIFF_NORMED']
 
-for meth in methods:
-    img_copy = img.copy()
-    method = getattr(cv, meth)
+    for meth in methods:
+        img_copy = img.copy()
+        method = getattr(cv, meth)
 
-    // Apply template matching
-    res = cv.matchTemplate(img_copy, template, method)
-    min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
+        // Apply template matching
+        res = cv.matchTemplate(img_copy, template, method)
+        min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
 
-    // Determine matching location
-    if method in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
-        top_left = min_loc
-    else:
-        top_left = max_loc
-    bottom_right = (top_left[0] + w, top_left[1] + h)
+        // Determine matching location
+        if method in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
+            top_left = min_loc
+        else:
+            top_left = max_loc
+        bottom_right = (top_left[0] + w, top_left[1] + h)
 
-    // Draw rectangle on the image
-    color = (255, 0, 0)  // Red rectangle
-    cv.rectangle(img_copy, top_left, bottom_right, color, 2)
+        // Draw rectangle on the image
+        color = (255, 0, 0)  // Red rectangle
+        cv.rectangle(img_copy, top_left, bottom_right, color, 2)
 
-    // Display results
-    plt.subplot(121), plt.imshow(res, cmap='gray')
-    plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-    plt.subplot(122), plt.imshow(img_copy, cmap='gray')
-    plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
-    plt.suptitle(meth)
+        // Display results
+        plt.subplot(121), plt.imshow(res, cmap='gray')
+        plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+        plt.subplot(122), plt.imshow(img_copy, cmap='gray')
+        plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+        plt.suptitle(meth)
 
-    // Save output images
-    output_filename = f'result_{meth}.png'
-    cv.imwrite(output_filename, img_copy)
-    plt.show()
+        // Save output images
+        output_filename = f'result_{meth}.png'
+        cv.imwrite(output_filename, img_copy)
+        plt.show()
 This enhanced version adds file handling, better visuals, and output storage, making the script more robust and user-friendly.
 4o
 
-  # Vous avez dit :
-     does the size of the image pattern influences the possibility of pattern matching
+# Vous avez dit :
+### does the size of the image pattern influences the possibility of pattern matching
 # Chatgpt a dit :
 ChatGPT
 Yes, the size of the image pattern (template) significantly influences the possibility and quality of pattern matching. Here’s how the size impacts the process:
