@@ -1,4 +1,4 @@
-### review import cv2 as cv import numpy as np from matplotlib import pyplot as plt img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE) assert img is not None, "file could not be read, check with os.path.exists()" img2 = img.copy() template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE) assert template is not None, "file could not be read, check with os.path.exists()" w, h = template.shape[::-1]  All the 6 methods for comparison in a list methods = ['TM_CCOEFF', 'TM_CCOEFF_NORMED', 'TM_CCORR', 'TM_CCORR_NORMED', 'TM_SQDIFF', 'TM_SQDIFF_NORMED'] for meth in methods: img = img2.copy() method = getattr(cv, meth)  Apply template Matching res = cv.matchTemplate(img,template,method) min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)  If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum if method in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]: top_left = min_loc else: top_left = max_loc bottom_right = (top_left[0] + w, top_left[1] + h) cv.rectangle(img,top_left, bottom_right, 255, 2) plt.subplot(121),plt.imshow(res,cmap = 'gray') plt.title('Matching Result'), plt.xticks([]), plt.yticks([]) plt.subplot(122),plt.imshow(img,cmap = 'gray') plt.title('Detected Point'), plt.xticks([]), plt.yticks([]) plt.suptitle(meth) plt.show() 
+    review import cv2 as cv import numpy as np from matplotlib import pyplot as plt img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE) assert img is not None, "file could not be read, check with os.path.exists()" img2 = img.copy() template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE) assert template is not None, "file could not be read, check with os.path.exists()" w, h = template.shape[::-1]  All the 6 methods for comparison in a list methods = ['TM_CCOEFF', 'TM_CCOEFF_NORMED', 'TM_CCORR', 'TM_CCORR_NORMED', 'TM_SQDIFF', 'TM_SQDIFF_NORMED'] for meth in methods: img = img2.copy() method = getattr(cv, meth)  Apply template Matching res = cv.matchTemplate(img,template,method) min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)  If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum if method in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]: top_left = min_loc else: top_left = max_loc bottom_right = (top_left[0] + w, top_left[1] + h) cv.rectangle(img,top_left, bottom_right, 255, 2) plt.subplot(121),plt.imshow(res,cmap = 'gray') plt.title('Matching Result'), plt.xticks([]), plt.yticks([]) plt.subplot(122),plt.imshow(img,cmap = 'gray') plt.title('Detected Point'), plt.xticks([]), plt.yticks([]) plt.suptitle(meth) plt.show() 
 
 # Chatgpt a dit :
 ChatGPT
@@ -33,8 +33,8 @@ o	This clarification can be in the output or a comment.
 o	Using a dynamic color for rectangles instead of hardcoded 255 (white) could improve visual distinction when viewing multiple results. For instance, use:
 python
 Copier le code  
-color = (255, 0, 0)  // Red rectangle
-cv.rectangle(img, top_left, bottom_right, color, 2)
+    color = (255, 0, 0)  // Red rectangle
+    cv.rectangle(img, top_left, bottom_right, color, 2)
 5.	Efficiency:
 o	Copying the image within the loop (img = img2.copy()) ensures that each method gets a fresh image. This is good practice but can be optimized further if unnecessary duplication is avoided.
 6.	Command-line Arguments:
@@ -175,50 +175,50 @@ Steps:
 Code Example:
 python
 Copier le code
-import cv2 as cv
-import numpy as np
-from matplotlib import pyplot as plt
+    import cv2 as cv
+    import numpy as np
+    from matplotlib import pyplot as plt
 
-// Load images
-img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE)
-template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE)
-w, h = template.shape[::-1]
+    // Load images
+    img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE)
+    template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE)
+    w, h = template.shape[::-1]
 
-// Scale range and step
-scale_range = np.linspace(0.5, 2.0, 20)  // Scale from 50% to 200%
-best_match = None
-best_scale = None
-best_val = -np.inf
+    // Scale range and step
+    scale_range = np.linspace(0.5, 2.0, 20)  // Scale from 50% to 200%
+    best_match = None
+    best_scale = None
+    best_val = -np.inf
 
-for scale in scale_range:
-    resized_template = cv.resize(template, None, fx=scale, fy=scale, interpolation=cv.INTER_LINEAR)
-    rw, rh = resized_template.shape[::-1]
-    
-    if rw > img.shape[1] or rh > img.shape[0]:  // Skip if template is larger than the image
-        continue
+    for scale in scale_range:
+        resized_template = cv.resize(template, None, fx=scale, fy=scale, interpolation=cv.INTER_LINEAR)
+        rw, rh = resized_template.shape[::-1]
+        
+        if rw > img.shape[1] or rh > img.shape[0]:  // Skip if template is larger than the image
+            continue
 
-    res = cv.matchTemplate(img, resized_template, cv.TM_CCOEFF_NORMED)
-    _, max_val, _, max_loc = cv.minMaxLoc(res)
-    
-    if max_val > best_val:  // Update best match
-        best_val = max_val
-        best_match = (max_loc, (max_loc[0] + rw, max_loc[1] + rh))
-        best_scale = scale
+        res = cv.matchTemplate(img, resized_template, cv.TM_CCOEFF_NORMED)
+        _, max_val, _, max_loc = cv.minMaxLoc(res)
+        
+        if max_val > best_val:  // Update best match
+            best_val = max_val
+            best_match = (max_loc, (max_loc[0] + rw, max_loc[1] + rh))
+            best_scale = scale
 
-// Draw rectangle for best match
-if best_match:
-    top_left, bottom_right = best_match
-    img_result = img.copy()
-    cv.rectangle(img_result, top_left, bottom_right, 255, 2)
+    // Draw rectangle for best match
+    if best_match:
+        top_left, bottom_right = best_match
+        img_result = img.copy()
+        cv.rectangle(img_result, top_left, bottom_right, 255, 2)
 
-    // Display results
-    print(f"Best scale: {best_scale}, Match value: {best_val}")
-    plt.subplot(121), plt.imshow(img_result, cmap='gray')
-    plt.title('Detected Pattern')
-    plt.subplot(122), plt.imshow(template, cmap='gray')
-    plt.title(f'Template at Best Scale ({best_scale})')
-    plt.show()
-________________________________________
+        // Display results
+        print(f"Best scale: {best_scale}, Match value: {best_val}")
+        plt.subplot(121), plt.imshow(img_result, cmap='gray')
+        plt.title('Detected Pattern')
+        plt.subplot(122), plt.imshow(template, cmap='gray')
+        plt.title(f'Template at Best Scale ({best_scale})')
+        plt.show()
+    ________________________________________
 2. Feature-Based Matching (Recommended for Scale Invariance)
 Feature-based matching algorithms, like SIFT, SURF, or ORB, are inherently robust to scale, rotation, and perspective changes.
 •	Advantages:
@@ -227,30 +227,30 @@ o	Detects features and matches them across images.
 •	Code Example Using ORB:
 python
 Copier le code
-import cv2 as cv
-import numpy as np
-from matplotlib import pyplot as plt
+    import cv2 as cv
+    import numpy as np
+    from matplotlib import pyplot as plt
 
-// Load images
-img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE)
-template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE)
+    // Load images
+    img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE)
+    template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE)
 
-// Initiate ORB detector
-orb = cv.ORB_create()
+    // Initiate ORB detector
+    orb = cv.ORB_create()
 
-// Find keypoints and descriptors
-keypoints1, descriptors1 = orb.detectAndCompute(template, None)
-keypoints2, descriptors2 = orb.detectAndCompute(img, None)
+    // Find keypoints and descriptors
+    keypoints1, descriptors1 = orb.detectAndCompute(template, None)
+    keypoints2, descriptors2 = orb.detectAndCompute(img, None)
 
-// Match descriptors using BFMatcher
-bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=True)
-matches = bf.match(descriptors1, descriptors2)
-matches = sorted(matches, key=lambda x: x.distance)
+    // Match descriptors using BFMatcher
+    bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=True)
+    matches = bf.match(descriptors1, descriptors2)
+    matches = sorted(matches, key=lambda x: x.distance)
 
-// Draw matches
-img_matches = cv.drawMatches(template, keypoints1, img, keypoints2, matches[:10], None, flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-plt.imshow(img_matches), plt.title("Feature Matching")
-plt.show()
+    // Draw matches
+    img_matches = cv.drawMatches(template, keypoints1, img, keypoints2, matches[:10], None, flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    plt.imshow(img_matches), plt.title("Feature Matching")
+    plt.show()
 ________________________________________
 3. Use a Scale-Invariant Detection Framework
 Methods like FREAK or BRISK, combined with feature matching, are designed for scale and rotation invariance.
@@ -268,33 +268,33 @@ Steps:
 Code Example:
 python
 Copier le code
-img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE)
-template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE)
-w, h = template.shape[::-1]
+    img = cv.imread('Hand with bg.jpg', cv.IMREAD_GRAYSCALE)
+    template = cv.imread('Clubs.png', cv.IMREAD_GRAYSCALE)
+    w, h = template.shape[::-1]
 
-// Generate image pyramid
-scales = [1, 0.75, 0.5, 0.25]
-best_match = None
-best_val = -np.inf
+    // Generate image pyramid
+    scales = [1, 0.75, 0.5, 0.25]
+    best_match = None
+    best_val = -np.inf
 
-for scale in scales:
-    resized_img = cv.resize(img, None, fx=scale, fy=scale, interpolation=cv.INTER_LINEAR)
-    res = cv.matchTemplate(resized_img, template, cv.TM_CCOEFF_NORMED)
-    _, max_val, _, max_loc = cv.minMaxLoc(res)
-    
-    if max_val > best_val:
-        best_val = max_val
-        best_match = (int(max_loc[0] / scale), int(max_loc[1] / scale))  // Scale back to original
-        best_scale = scale
+    for scale in scales:
+        resized_img = cv.resize(img, None, fx=scale, fy=scale, interpolation=cv.INTER_LINEAR)
+        res = cv.matchTemplate(resized_img, template, cv.TM_CCOEFF_NORMED)
+        _, max_val, _, max_loc = cv.minMaxLoc(res)
+        
+        if max_val > best_val:
+            best_val = max_val
+            best_match = (int(max_loc[0] / scale), int(max_loc[1] / scale))  // Scale back to original
+            best_scale = scale
 
-// Draw result
-if best_match:
-    top_left = best_match
-    bottom_right = (top_left[0] + w, top_left[1] + h)
-    cv.rectangle(img, top_left, bottom_right, 255, 2)
-    plt.imshow(img, cmap='gray')
-    plt.title(f"Best Match at Scale {best_scale}")
-    plt.show()
+    // Draw result
+    if best_match:
+        top_left = best_match
+        bottom_right = (top_left[0] + w, top_left[1] + h)
+        cv.rectangle(img, top_left, bottom_right, 255, 2)
+        plt.imshow(img, cmap='gray')
+        plt.title(f"Best Match at Scale {best_scale}")
+        plt.show()
 ________________________________________
 5. Deep Learning-Based Solutions
 For highly complex scenarios, consider using object detection frameworks (e.g., YOLO, SSD, or Faster R-CNN). These models are trained to detect objects regardless of their size or orientation.
@@ -311,7 +311,7 @@ ChatGPT
 The cv.rectangle() function in OpenCV is used to draw a rectangle on an image. Let's break down the function call you provided:
 python
 Copier le code
-cv.rectangle(img, top_left, bottom_right, 800, 2)
+    cv.rectangle(img, top_left, bottom_right, 800, 2)
 ________________________________________
 Explanation of Parameters
 1.	img:
@@ -342,14 +342,14 @@ Example
 If you want to draw a white rectangle on a grayscale image with specific coordinates:
 python
 Copier le code
-cv.rectangle(img, (50, 50), (150, 150), 255, 2)
+    cv.rectangle(img, (50, 50), (150, 150), 255, 2)
 This will:
 •	Draw a white rectangle from (50, 50) to (150, 150).
 •	The rectangle will have a 2-pixel-thick border.
 In your case:
 python
 Copier le code
-cv.rectangle(img, top_left, bottom_right, 800, 2)
+    cv.rectangle(img, top_left, bottom_right, 800, 2)
 If the coordinates for top_left are (100, 100) and for bottom_right are (200, 200), this will:
 •	Draw a white rectangle from (100, 100) to (200, 200).
 •	The rectangle's border will be 2 pixels thick.
@@ -388,67 +388,67 @@ ________________________________________
 Voici un squelette simple pour démarrer :
 python
 Copier le code
-import cv2
-import numpy as np
+    import cv2
+    import numpy as np
 
-def preprocess_image(image):
-    """Prétraitement de l'image"""
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-    _, thresh = cv2.threshold(blurred, 127, 255, cv2.THRESH_BINARY_INV)
-    return thresh
+    def preprocess_image(image):
+        """Prétraitement de l'image"""
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, thresh = cv2.threshold(blurred, 127, 255, cv2.THRESH_BINARY_INV)
+        return thresh
 
-def find_cards(thresh):
-    """Détection des contours des cartes"""
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    card_contours = []
-    for cnt in contours:
-        // Filtrer les contours en fonction de leur surface
-        if 5000 < cv2.contourArea(cnt) < 50000:  // Ajuster les seuils
-            card_contours.append(cnt)
-    return card_contours
+    def find_cards(thresh):
+        """Détection des contours des cartes"""
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        card_contours = []
+        for cnt in contours:
+            // Filtrer les contours en fonction de leur surface
+            if 5000 < cv2.contourArea(cnt) < 50000:  // Ajuster les seuils
+                card_contours.append(cnt)
+        return card_contours
 
-def extract_cards(image, card_contours):
-    """Extraction des cartes rectifiées"""
-    cards = []
-    for cnt in card_contours:
-        epsilon = 0.02 * cv2.arcLength(cnt, True)
-        approx = cv2.approxPolyDP(cnt, epsilon, True)
-        if len(approx) == 4:  // On s'assure qu'il s'agit d'un quadrilatère
-            // Perspective transform
-            pts = np.float32([pt[0] for pt in approx])
-            size = 200  // Taille standard pour chaque carte
-            target_pts = np.float32([[0, 0], [size, 0], [size, size], [0, size]])
-            matrix = cv2.getPerspectiveTransform(pts, target_pts)
-            warp = cv2.warpPerspective(image, matrix, (size, size))
-            cards.append(warp)
-    return cards
+    def extract_cards(image, card_contours):
+        """Extraction des cartes rectifiées"""
+        cards = []
+        for cnt in card_contours:
+            epsilon = 0.02 * cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, epsilon, True)
+            if len(approx) == 4:  // On s'assure qu'il s'agit d'un quadrilatère
+                // Perspective transform
+                pts = np.float32([pt[0] for pt in approx])
+                size = 200  // Taille standard pour chaque carte
+                target_pts = np.float32([[0, 0], [size, 0], [size, size], [0, size]])
+                matrix = cv2.getPerspectiveTransform(pts, target_pts)
+                warp = cv2.warpPerspective(image, matrix, (size, size))
+                cards.append(warp)
+        return cards
 
-// Main
-cap = cv2.VideoCapture(0)
+    // Main
+    cap = cv2.VideoCapture(0)
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
-    
-    thresh = preprocess_image(frame)
-    card_contours = find_cards(thresh)
-    cards = extract_cards(frame, card_contours)
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        thresh = preprocess_image(frame)
+        card_contours = find_cards(thresh)
+        cards = extract_cards(frame, card_contours)
 
-    // Affichage des cartes détectées
-    for i, card in enumerate(cards):
-        cv2.imshow(f'Card {i+1}', card)
+        // Affichage des cartes détectées
+        for i, card in enumerate(cards):
+            cv2.imshow(f'Card {i+1}', card)
 
-    // Dessiner les contours détectés
-    cv2.drawContours(frame, card_contours, -1, (0, 255, 0), 2)
-    cv2.imshow('Frame', frame)
-    
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        // Dessiner les contours détectés
+        cv2.drawContours(frame, card_contours, -1, (0, 255, 0), 2)
+        cv2.imshow('Frame', frame)
+        
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
-cap.release()
-cv2.destroyAllWindows()
+    cap.release()
+    cv2.destroyAllWindows()
 ________________________________________
 4. Améliorations possibles
 •	Entraînez un modèle d'apprentissage automatique pour reconnaître les valeurs et les couleurs des cartes.
@@ -469,35 +469,35 @@ ________________________________________
 •	If the corners are not properly aligned, use feature matching (e.g., SIFT, ORB) to determine the best alignment and apply a perspective or affine transformation to match the template.
 python
 Copier le code
-import cv2
-import numpy as np
+    import cv2
+    import numpy as np
 
-// Load images
-corner_img = cv2.imread('corner.png', 0)  // Corner image
-template_img = cv2.imread('template.png', 0)  // Template image
+    // Load images
+    corner_img = cv2.imread('corner.png', 0)  // Corner image
+    template_img = cv2.imread('template.png', 0)  // Template image
 
-// Detect and compute keypoints and descriptors
-sift = cv2.SIFT_create()
-keypoints1, descriptors1 = sift.detectAndCompute(corner_img, None)
-keypoints2, descriptors2 = sift.detectAndCompute(template_img, None)
+    // Detect and compute keypoints and descriptors
+    sift = cv2.SIFT_create()
+    keypoints1, descriptors1 = sift.detectAndCompute(corner_img, None)
+    keypoints2, descriptors2 = sift.detectAndCompute(template_img, None)
 
-// Match features
-bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
-matches = bf.match(descriptors1, descriptors2)
+    // Match features
+    bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+    matches = bf.match(descriptors1, descriptors2)
 
-// Sort matches by distance
-matches = sorted(matches, key=lambda x: x.distance)
+    // Sort matches by distance
+    matches = sorted(matches, key=lambda x: x.distance)
 
-// Extract matched keypoints
-src_pts = np.float32([keypoints1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-dst_pts = np.float32([keypoints2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+    // Extract matched keypoints
+    src_pts = np.float32([keypoints1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
+    dst_pts = np.float32([keypoints2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
 
-// Compute homography matrix
-matrix, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+    // Compute homography matrix
+    matrix, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
 
-// Warp the corner image to align with the template
-h, w = template_img.shape
-aligned_img = cv2.warpPerspective(corner_img, matrix, (w, h))
+    // Warp the corner image to align with the template
+    h, w = template_img.shape
+    aligned_img = cv2.warpPerspective(corner_img, matrix, (w, h))
 Use aligned_img for further processing.
 ________________________________________
 3. Adjust ROI Cropping
@@ -507,16 +507,16 @@ ________________________________________
 •	Use cross-correlation (cv.matchTemplate) to determine the precise offset and adjust the alignment.
 python
 Copier le code
-result = cv2.matchTemplate(corner_img, template_img, cv2.TM_CCOEFF_NORMED)
-_, _, min_loc, max_loc = cv2.minMaxLoc(result)
+    result = cv2.matchTemplate(corner_img, template_img, cv2.TM_CCOEFF_NORMED)
+    _, _, min_loc, max_loc = cv2.minMaxLoc(result)
 
-// Get translation offset
-top_left = max_loc
-dx, dy = top_left
+    // Get translation offset
+    top_left = max_loc
+    dx, dy = top_left
 
-// Adjust alignment
-translation_matrix = np.float32([[1, 0, dx], [0, 1, dy]])
-aligned_img = cv2.warpAffine(corner_img, translation_matrix, (template_img.shape[1], template_img.shape[0]))
+    // Adjust alignment
+    translation_matrix = np.float32([[1, 0, dx], [0, 1, dy]])
+    aligned_img = cv2.warpAffine(corner_img, translation_matrix, (template_img.shape[1], template_img.shape[0]))
 ________________________________________
 5. Fine-Tune the Alignment
 •	Use manual translation adjustments to refine the alignment if automated methods are insufficient. This can be done by testing small shifts (e.g., using np.roll or modifying translation matrices).
@@ -525,10 +525,10 @@ ________________________________________
 •	Overlay the images to visualize the alignment issues and ensure they match correctly:
 python
 Copier le code
-overlay = cv2.addWeighted(corner_img, 0.5, template_img, 0.5, 0)
-cv2.imshow("Overlay", overlay)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    overlay = cv2.addWeighted(corner_img, 0.5, template_img, 0.5, 0)
+    cv2.imshow("Overlay", overlay)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 By using these techniques, you should be able to align the extracted corner with the template more precisely, ensuring accurate results from cv.absdiff.
 4o
 
@@ -551,91 +551,91 @@ Here’s a revised implementation:
 Updated Code
 python
 Copier le code
-def Process_Card(contour, image):
-    """
-    Extracts relevant features from a card's contour in the image.
-    
-    Args:
-        contour (ndarray): The contour of the card.
-        image (ndarray): The input image.
-    
-    Returns:
-        Card: A Card object with processed attributes.
-    """
-    card = Card()
-    card.contour = contour  // Store the card's contour
+    def Process_Card(contour, image):
+        """
+        Extracts relevant features from a card's contour in the image.
+        
+        Args:
+            contour (ndarray): The contour of the card.
+            image (ndarray): The input image.
+        
+        Returns:
+            Card: A Card object with processed attributes.
+        """
+        card = Card()
+        card.contour = contour  // Store the card's contour
 
-    // Approximate the contour to find corner points
-    peri = cv2.arcLength(contour, True)
-    approx = cv2.approxPolyDP(contour, 0.02 * peri, True)  // Reduced epsilon for tighter fitting
-    if len(approx) != 4:
-        raise ValueError("Contour approximation did not yield 4 points.")
+        // Approximate the contour to find corner points
+        peri = cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, 0.02 * peri, True)  // Reduced epsilon for tighter fitting
+        if len(approx) != 4:
+            raise ValueError("Contour approximation did not yield 4 points.")
 
-    pts = np.array([point[0] for point in approx], dtype=np.float32)
-    card.corner_pts = pts
+        pts = np.array([point[0] for point in approx], dtype=np.float32)
+        card.corner_pts = pts
 
-    // Calculate the width, height, and center point of the card
-    x, y, w, h = cv2.boundingRect(contour)
-    card.width, card.height = w, h
+        // Calculate the width, height, and center point of the card
+        x, y, w, h = cv2.boundingRect(contour)
+        card.width, card.height = w, h
 
-    // Compute the center of the card
-    center_x = int(np.mean(pts[:, 0]))
-    center_y = int(np.mean(pts[:, 1]))
-    card.center = [center_x, center_y]
+        // Compute the center of the card
+        center_x = int(np.mean(pts[:, 0]))
+        center_y = int(np.mean(pts[:, 1]))
+        card.center = [center_x, center_y]
 
-    // Reshape and transform the card image
-    card.img = Reshape_Card(image, pts)
+        // Reshape and transform the card image
+        card.img = Reshape_Card(image, pts)
 
-    return card
+        return card
 
-def Reshape_Card(image, corner_pts):
-    """
-    Warps the card image into a standard 200x300 size.
-    
-    Args:
-        image (ndarray): The input image.
-        corner_pts (ndarray): Corner points of the card.
-    
-    Returns:
-        ndarray: The warped and grayscaled card image.
-    """
-    // Order points consistently: [top-left, top-right, bottom-right, bottom-left]
-    rect = order_points(corner_pts)
-    maxWidth, maxHeight = 200, 300
+    def Reshape_Card(image, corner_pts):
+        """
+        Warps the card image into a standard 200x300 size.
+        
+        Args:
+            image (ndarray): The input image.
+            corner_pts (ndarray): Corner points of the card.
+        
+        Returns:
+            ndarray: The warped and grayscaled card image.
+        """
+        // Order points consistently: [top-left, top-right, bottom-right, bottom-left]
+        rect = order_points(corner_pts)
+        maxWidth, maxHeight = 200, 300
 
-    // Define destination points for warping
-    dst = np.array([[0, 0], [maxWidth - 1, 0], [maxWidth - 1, maxHeight - 1], [0, maxHeight - 1]], dtype=np.float32)
-    
-    // Perspective transformation
-    M = cv2.getPerspectiveTransform(rect, dst)
-    warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
-    warp = cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
+        // Define destination points for warping
+        dst = np.array([[0, 0], [maxWidth - 1, 0], [maxWidth - 1, maxHeight - 1], [0, maxHeight - 1]], dtype=np.float32)
+        
+        // Perspective transformation
+        M = cv2.getPerspectiveTransform(rect, dst)
+        warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
+        warp = cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
 
-    return warp
+        return warp
 
-def order_points(pts):
-    """
-    Orders points in consistent top-left, top-right, bottom-right, bottom-left order.
-    
-    Args:
-        pts (ndarray): Points to be ordered.
-    
-    Returns:
-        ndarray: Ordered points.
-    """
-    rect = np.zeros((4, 2), dtype="float32")
+    def order_points(pts):
+        """
+        Orders points in consistent top-left, top-right, bottom-right, bottom-left order.
+        
+        Args:
+            pts (ndarray): Points to be ordered.
+        
+        Returns:
+            ndarray: Ordered points.
+        """
+        rect = np.zeros((4, 2), dtype="float32")
 
-    // Top-left has the smallest sum, bottom-right has the largest sum
-    s = pts.sum(axis=1)
-    rect[0] = pts[np.argmin(s)]
-    rect[2] = pts[np.argmax(s)]
+        // Top-left has the smallest sum, bottom-right has the largest sum
+        s = pts.sum(axis=1)
+        rect[0] = pts[np.argmin(s)]
+        rect[2] = pts[np.argmax(s)]
 
-    // Top-right has the smallest difference, bottom-left has the largest difference
-    diff = np.diff(pts, axis=1)
-    rect[1] = pts[np.argmin(diff)]
-    rect[3] = pts[np.argmax(diff)]
+        // Top-right has the smallest difference, bottom-left has the largest difference
+        diff = np.diff(pts, axis=1)
+        rect[1] = pts[np.argmin(diff)]
+        rect[3] = pts[np.argmax(diff)]
 
-    return rect
+        return rect
 Key Improvements
 1.	Contour Approximation:
 o	Tightened the epsilon parameter in cv2.approxPolyDP to ensure a better match.
@@ -701,28 +701,28 @@ plt.show()
 To display all images in a loop:
 python
 Copier le code
-for i, card in enumerate(families):
-    plt.imshow(card.img)  // Use the card (object) directly
-    plt.title(f'Image {i+1}')  // Optional: Dynamic titles
-    plt.axis('off')  // Optional: Hide axis ticks
-    plt.show()
+    for i, card in enumerate(families):
+        plt.imshow(card.img)  // Use the card (object) directly
+        plt.title(f'Image {i+1}')  // Optional: Dynamic titles
+        plt.axis('off')  // Optional: Hide axis ticks
+        plt.show()
 To display multiple images in a grid:
 python
 Copier le code
-import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
 
-// Number of rows and columns for the grid
-rows, cols = (2, 3)  // Adjust based on the number of images
-fig, axes = plt.subplots(rows, cols, figsize=(10, 6))
+    // Number of rows and columns for the grid
+    rows, cols = (2, 3)  // Adjust based on the number of images
+    fig, axes = plt.subplots(rows, cols, figsize=(10, 6))
 
-for i, card in enumerate(families):
-    ax = axes[i // cols, i % cols]  // Map to grid
-    ax.imshow(card.img)
-    ax.set_title(f'Image {i+1}')
-    ax.axis('off')  // Optional: Hide axis
+    for i, card in enumerate(families):
+        ax = axes[i // cols, i % cols]  // Map to grid
+        ax.imshow(card.img)
+        ax.set_title(f'Image {i+1}')
+        ax.axis('off')  // Optional: Hide axis
 
-plt.tight_layout()
-plt.show()
+    plt.tight_layout()
+    plt.show()
 Key Points:
 •	Replace families[i].img with card.img inside the loop to align with enumerate.
 •	Use plt.axis('off') to remove axes for a cleaner display.
@@ -737,23 +737,23 @@ You're correct that cards with rounded corners or slightly imperfect quadrilater
 •	Improvement: Relax the tolerance in cv2.approxPolyDP to ensure the contour approximations include the rounded corners effectively.
 python
 Copier le code
-approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
+    approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
 This tighter tolerance might give better results with rounded corners.
 ________________________________________
 2. Polygon Fitting and Sorting Points
 If the detected points from approxPolyDP don't align well with card corners, you can fit the contour to a polygon with exactly four points. For example, use a bounding quadrilateral via cv2.minAreaRect:
 python
 Copier le code
-rect = cv2.minAreaRect(contour)
-box = cv2.boxPoints(rect)
-box = np.int0(box)  // Convert to integer
+    rect = cv2.minAreaRect(contour)
+    box = cv2.boxPoints(rect)
+    box = np.int0(box)  // Convert to integer
 This ensures you always get four points, even if the card is rotated or its corners are slightly rounded.
 ________________________________________
 3. Shape Regularization
 Rounded corners might slightly distort the bounding points. To mitigate this, use the convex hull of the contour:
 python
 Copier le code
-hull = cv2.convexHull(contour)
+    hull = cv2.convexHull(contour)
 The convex hull removes concavities and can make your contour more card-like, which helps with perspective transformation.
 ________________________________________
 4. Perspective Transformation Adjustments
@@ -773,21 +773,21 @@ Updated Reshape_Card with Better Corner Handling
 Here’s a revised Reshape_Card function:
 python
 Copier le code
-def Reshape_Card(image, corner_pts, width, height):
-    """
-    Warps the card image into a standard 200x300 size with improved corner handling.
-    """
-    rect = cv2.minAreaRect(corner_pts)
-    box = cv2.boxPoints(rect)
-    box = np.array(sorted(box, key=lambda x: (x[1], x[0])), dtype="float32")
+    def Reshape_Card(image, corner_pts, width, height):
+        """
+        Warps the card image into a standard 200x300 size with improved corner handling.
+        """
+        rect = cv2.minAreaRect(corner_pts)
+        box = cv2.boxPoints(rect)
+        box = np.array(sorted(box, key=lambda x: (x[1], x[0])), dtype="float32")
 
-    maxWidth, maxHeight = 200, 300
-    dst = np.array([[0, 0], [maxWidth - 1, 0], [maxWidth - 1, maxHeight - 1], [0, maxHeight - 1]], np.float32)
-    M = cv2.getPerspectiveTransform(box, dst)
-    warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
-    warp = cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
+        maxWidth, maxHeight = 200, 300
+        dst = np.array([[0, 0], [maxWidth - 1, 0], [maxWidth - 1, maxHeight - 1], [0, maxHeight - 1]], np.float32)
+        M = cv2.getPerspectiveTransform(box, dst)
+        warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
+        warp = cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
 
-    return warp
+        return warp
 ________________________________________
 Debugging and Visualization
 1.	Visualize Detected Points: Draw the detected contours and corner points on the original image to debug.
@@ -804,7 +804,7 @@ You compute the convex hull for each detected contour. This step simplifies the 
 Here’s an example of how to use cv2.convexHull:
 python
 Copier le code
-hull = cv2.convexHull(contour)
+    hull = cv2.convexHull(contour)
 This gives you a new contour that is the convex hull of the original one.
 ________________________________________
 Step 2: Integrate into the Find_cards Function
@@ -866,8 +866,8 @@ To debug and visualize the effect of using the convex hull:
 2.	Compare the results visually to ensure that the convex hull correctly captures the card’s boundaries.
 python
 Copier le code
-cv2.drawContours(output_image, [contour], -1, (255, 0, 0), 2)  // Original contour in blue
-cv2.drawContours(output_image, [hull], -1, (0, 255, 0), 2)     // Convex hull in green
+    cv2.drawContours(output_image, [contour], -1, (255, 0, 0), 2)  // Original contour in blue
+    cv2.drawContours(output_image, [hull], -1, (0, 255, 0), 2)     // Convex hull in green
 This visualization will confirm that the convex hull eliminates concavities and better matches the card's shape.
 
   optimize this function def Reshape_Card(image, corner_pts, width, height): """ Warps the card image into a standard 200x300 size. Args: image (ndarray): The input image. corner_pts (ndarray): Corner points of the card. width (int): Width of the bounding rectangle. height (int): Height of the bounding rectangle. Returns: ndarray: The warped and grayscaled card image. """ // Create temporary rectangle to hold corners of card temp_rect = np.zeros((4,2), dtype = "float32") // sum = np.sum(corner_pts, axis = 2) top_left = corner_pts[np.argmin(sum)] bot_right = corner_pts[np.argmax(sum)] diff = np.diff(corner_pts, axis = -1) top_right = corner_pts[np.argmin(diff)] bot_left = corner_pts[np.argmax(diff)] if width <= 0.8*height: // If card is vertically oriented temp_rect[0] = top_left temp_rect[1] = top_right temp_rect[2] = bot_right temp_rect[3] = bot_left if width >= 1.2*height: // If card is horizontally oriented temp_rect[0] = bot_left temp_rect[1] = top_left temp_rect[2] = top_right temp_rect[3] = bot_right // If the card is 'diamond' oriented, a different algorithm // has to be used to identify which point is top left, top right // bottom left, and bottom right. if width > 0.8*height and width < 1.2*height: //If card is diamond oriented // If furthest left point is higher than furthest right point, // card is tilted to the left. if corner_pts[1][0][1] <= corner_pts[3][0][1]: // If card is titled to the left, approxPolyDP returns points // in this order: top right, top left, bottom left, bottom right temp_rect[0] = corner_pts[1][0] // Top left temp_rect[1] = corner_pts[0][0] // Top right temp_rect[2] = corner_pts[3][0] // Bottom right temp_rect[3] = corner_pts[2][0] // Bottom left // If furthest left point is lower than furthest right point, // card is tilted to the right if corner_pts[1][0][1] > corner_pts[3][0][1]: // If card is titled to the right, approxPolyDP returns points // in this order: top left, bottom left, bottom right, top right temp_rect[0] = corner_pts[0][0] // Top left temp_rect[1] = corner_pts[3][0] // Top right temp_rect[2] = corner_pts[2][0] // Bottom right temp_rect[3] = corner_pts[1][0] // Bottom left maxWidth = 200 maxHeight = 300 // Create destination array, calculate perspective transform matrix, // and warp card image dst = np.array([[0,0],[maxWidth-1,0],[maxWidth-1,maxHeight-1],[0, maxHeight-1]], np.float32) M = cv2.getPerspectiveTransform(temp_rect,dst) warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight)) warp = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY) return warp 
@@ -880,51 +880,51 @@ Changes and Improvements:
 3.	Improved Readability: Reformatted the code for better readability and maintainability.
 python
 Copier le code
-def Reshape_Card(image, corner_pts, width, height):
-    """
-    Warps the card image into a standard 200x300 size.
+    def Reshape_Card(image, corner_pts, width, height):
+        """
+        Warps the card image into a standard 200x300 size.
 
-    Args:
-        image (ndarray): The input image.
-        corner_pts (ndarray): Corner points of the card.
-        width (int): Width of the bounding rectangle.
-        height (int): Height of the bounding rectangle.
+        Args:
+            image (ndarray): The input image.
+            corner_pts (ndarray): Corner points of the card.
+            width (int): Width of the bounding rectangle.
+            height (int): Height of the bounding rectangle.
 
-    Returns:
-        ndarray: The warped and grayscaled card image.
-    """
-    import numpy as np
-    import cv2
+        Returns:
+            ndarray: The warped and grayscaled card image.
+        """
+        import numpy as np
+        import cv2
 
-    // Calculate sums and differences of corner points
-    sum_pts = np.sum(corner_pts, axis=2)
-    diff_pts = np.diff(corner_pts, axis=-1)
+        // Calculate sums and differences of corner points
+        sum_pts = np.sum(corner_pts, axis=2)
+        diff_pts = np.diff(corner_pts, axis=-1)
 
-    // Identify corners based on geometric properties
-    top_left = corner_pts[np.argmin(sum_pts)][0]
-    bot_right = corner_pts[np.argmax(sum_pts)][0]
-    top_right = corner_pts[np.argmin(diff_pts)][0]
-    bot_left = corner_pts[np.argmax(diff_pts)][0]
+        // Identify corners based on geometric properties
+        top_left = corner_pts[np.argmin(sum_pts)][0]
+        bot_right = corner_pts[np.argmax(sum_pts)][0]
+        top_right = corner_pts[np.argmin(diff_pts)][0]
+        bot_left = corner_pts[np.argmax(diff_pts)][0]
 
-    // Determine card orientation and assign corners
-    temp_rect = np.zeros((4, 2), dtype="float32")
-    if width <= 0.8 * height:  // Vertical orientation
-        temp_rect[:] = [top_left, top_right, bot_right, bot_left]
-    elif width >= 1.2 * height:  // Horizontal orientation
-        temp_rect[:] = [bot_left, top_left, top_right, bot_right]
-    else:  // Diamond orientation
-        if corner_pts[1][0][1] <= corner_pts[3][0][1]:  // Tilted left
-            temp_rect[:] = [corner_pts[1][0], corner_pts[0][0], corner_pts[3][0], corner_pts[2][0]]
-        else:  // Tilted right
-            temp_rect[:] = [corner_pts[0][0], corner_pts[3][0], corner_pts[2][0], corner_pts[1][0]]
+        // Determine card orientation and assign corners
+        temp_rect = np.zeros((4, 2), dtype="float32")
+        if width <= 0.8 * height:  // Vertical orientation
+            temp_rect[:] = [top_left, top_right, bot_right, bot_left]
+        elif width >= 1.2 * height:  // Horizontal orientation
+            temp_rect[:] = [bot_left, top_left, top_right, bot_right]
+        else:  // Diamond orientation
+            if corner_pts[1][0][1] <= corner_pts[3][0][1]:  // Tilted left
+                temp_rect[:] = [corner_pts[1][0], corner_pts[0][0], corner_pts[3][0], corner_pts[2][0]]
+            else:  // Tilted right
+                temp_rect[:] = [corner_pts[0][0], corner_pts[3][0], corner_pts[2][0], corner_pts[1][0]]
 
-    // Define destination points for warping
-    dst = np.array([[0, 0], [199, 0], [199, 299], [0, 299]], dtype="float32")
+        // Define destination points for warping
+        dst = np.array([[0, 0], [199, 0], [199, 299], [0, 299]], dtype="float32")
 
-    // Perform perspective transformation and grayscale conversion
-    M = cv2.getPerspectiveTransform(temp_rect, dst)
-    warp = cv2.warpPerspective(image, M, (200, 300))
-    return cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
+        // Perform perspective transformation and grayscale conversion
+        M = cv2.getPerspectiveTransform(temp_rect, dst)
+        warp = cv2.warpPerspective(image, M, (200, 300))
+        return cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
 Key Improvements:
 1.	Reduced Complexity: The use of conditional assignments with temp_rect[:] eliminates repeated temp_rect indexing logic.
 2.	Optimized Imports: Imports are included in the function to make it self-contained if necessary.
@@ -943,39 +943,39 @@ Improvements:
 3.	Efficiency Gains: Used efficient numpy operations for calculations.
 python
 Copier le code
-def Process_Card(contour, image):
-    """
-    Extracts relevant features from a card's contour in the image.
+    def Process_Card(contour, image):
+        """
+        Extracts relevant features from a card's contour in the image.
 
-    Args:
-        contour (ndarray): The contour of the card.
-        image (ndarray): The input image.
+        Args:
+            contour (ndarray): The contour of the card.
+            image (ndarray): The input image.
 
-    Returns:
-        Card: A Card object with processed attributes.
-    """
-    import numpy as np
-    import cv2
+        Returns:
+            Card: A Card object with processed attributes.
+        """
+        import numpy as np
+        import cv2
 
-    // Initialize the Card object
-    card = Card()
-    card.contour = contour  // Store the contour
+        // Initialize the Card object
+        card = Card()
+        card.contour = contour  // Store the contour
 
-    // Approximate the contour to find corner points
-    peri = cv2.arcLength(contour, True)
-    approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
-    card.corner_pts = np.float32(approx)
+        // Approximate the contour to find corner points
+        peri = cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
+        card.corner_pts = np.float32(approx)
 
-    // Get bounding rectangle dimensions
-    x, y, card.width, card.height = cv2.boundingRect(contour)
+        // Get bounding rectangle dimensions
+        x, y, card.width, card.height = cv2.boundingRect(contour)
 
-    // Compute card center by averaging corner points
-    card.center = np.mean(card.corner_pts.reshape(-1, 2), axis=0).astype(int).tolist()
+        // Compute card center by averaging corner points
+        card.center = np.mean(card.corner_pts.reshape(-1, 2), axis=0).astype(int).tolist()
 
-    // Reshape and transform the card image
-    card.img = Reshape_Card(image, card.corner_pts, card.width, card.height)
+        // Reshape and transform the card image
+        card.img = Reshape_Card(image, card.corner_pts, card.width, card.height)
 
-    return card
+        return card
 Key Changes:
 1.	Simplified center Calculation: Used np.mean directly on reshaped corner points instead of manually summing and dividing.
 2.	Direct Assignment for Bounding Rectangle: Combined the unpacking and attribute assignment in one step.
@@ -995,54 +995,54 @@ Solution:
 Updated Function:
 python
 Copier le code
-def Process_Card(contour, image):
-    """
-    Extracts relevant features from a card's contour in the image.
+    def Process_Card(contour, image):
+        """
+        Extracts relevant features from a card's contour in the image.
 
-    Args:
-        contour (ndarray): The contour of the card.
-        image (ndarray): The input image.
+        Args:
+            contour (ndarray): The contour of the card.
+            image (ndarray): The input image.
 
-    Returns:
-        Card: A Card object with processed attributes.
-    """
-    import numpy as np
-    import cv2
+        Returns:
+            Card: A Card object with processed attributes.
+        """
+        import numpy as np
+        import cv2
 
-    // Initialize the Card object
-    card = Card()
-    card.contour = contour  // Store the contour
+        // Initialize the Card object
+        card = Card()
+        card.contour = contour  // Store the contour
 
-    // Approximate the contour with a tighter threshold to handle rounded corners
-    peri = cv2.arcLength(contour, True)
-    approx = cv2.approxPolyDP(contour, 0.015 * peri, True)
+        // Approximate the contour with a tighter threshold to handle rounded corners
+        peri = cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, 0.015 * peri, True)
 
-    // Ensure the contour is a quadrilateral using a convex hull
-    if len(approx) != 4:
-        approx = cv2.convexHull(contour)
+        // Ensure the contour is a quadrilateral using a convex hull
+        if len(approx) != 4:
+            approx = cv2.convexHull(contour)
 
-    // Sort the corner points to a consistent order (top-left, top-right, bottom-right, bottom-left)
-    pts = approx.reshape(-1, 2)
-    s = np.sum(pts, axis=1)
-    diff = np.diff(pts, axis=1)
-    rect = np.zeros((4, 2), dtype="float32")
-    rect[0] = pts[np.argmin(s)]       // Top-left
-    rect[2] = pts[np.argmax(s)]       // Bottom-right
-    rect[1] = pts[np.argmin(diff)]    // Top-right
-    rect[3] = pts[np.argmax(diff)]    // Bottom-left
+        // Sort the corner points to a consistent order (top-left, top-right, bottom-right, bottom-left)
+        pts = approx.reshape(-1, 2)
+        s = np.sum(pts, axis=1)
+        diff = np.diff(pts, axis=1)
+        rect = np.zeros((4, 2), dtype="float32")
+        rect[0] = pts[np.argmin(s)]       // Top-left
+        rect[2] = pts[np.argmax(s)]       // Bottom-right
+        rect[1] = pts[np.argmin(diff)]    // Top-right
+        rect[3] = pts[np.argmax(diff)]    // Bottom-left
 
-    card.corner_pts = rect
+        card.corner_pts = rect
 
-    // Get bounding rectangle dimensions
-    x, y, card.width, card.height = cv2.boundingRect(contour)
+        // Get bounding rectangle dimensions
+        x, y, card.width, card.height = cv2.boundingRect(contour)
 
-    // Compute card center using the reordered corner points
-    card.center = np.mean(rect, axis=0).astype(int).tolist()
+        // Compute card center using the reordered corner points
+        card.center = np.mean(rect, axis=0).astype(int).tolist()
 
-    // Reshape and transform the card image
-    card.img = Reshape_Card(image, rect, card.width, card.height)
+        // Reshape and transform the card image
+        card.img = Reshape_Card(image, rect, card.width, card.height)
 
-    return card
+        return card
 Key Adjustments:
 1.	Contour Approximation (cv2.approxPolyDP):
 o	Lowered the approximation epsilon to 0.015 * peri for better accuracy with rounded corners.
@@ -1062,32 +1062,32 @@ To adapt the Reshape_Card function to align with the updated Process_Card, we ca
 Adapted Reshape_Card Function:
 python
 Copier le code
-def Reshape_Card(image, corner_pts, width, height):
-    """
-    Warps the card image into a standard 200x300 size.
+    def Reshape_Card(image, corner_pts, width, height):
+        """
+        Warps the card image into a standard 200x300 size.
 
-    Args:
-        image (ndarray): The input image.
-        corner_pts (ndarray): Pre-sorted corner points of the card (top-left, top-right, bottom-right, bottom-left).
-        width (int): Width of the bounding rectangle.
-        height (int): Height of the bounding rectangle.
+        Args:
+            image (ndarray): The input image.
+            corner_pts (ndarray): Pre-sorted corner points of the card (top-left, top-right, bottom-right, bottom-left).
+            width (int): Width of the bounding rectangle.
+            height (int): Height of the bounding rectangle.
 
-    Returns:
-        ndarray: The warped and grayscaled card image.
-    """
-    import numpy as np
-    import cv2
+        Returns:
+            ndarray: The warped and grayscaled card image.
+        """
+        import numpy as np
+        import cv2
 
-    // Ensure corner points are in the correct format
-    rect = np.array(corner_pts, dtype="float32")
+        // Ensure corner points are in the correct format
+        rect = np.array(corner_pts, dtype="float32")
 
-    // Define destination points for warping
-    dst = np.array([[0, 0], [199, 0], [199, 299], [0, 299]], dtype="float32")
+        // Define destination points for warping
+        dst = np.array([[0, 0], [199, 0], [199, 299], [0, 299]], dtype="float32")
 
-    // Perform perspective transformation and grayscale conversion
-    M = cv2.getPerspectiveTransform(rect, dst)
-    warp = cv2.warpPerspective(image, M, (200, 300))
-    return cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
+        // Perform perspective transformation and grayscale conversion
+        M = cv2.getPerspectiveTransform(rect, dst)
+        warp = cv2.warpPerspective(image, M, (200, 300))
+        return cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
 Key Changes:
 1.	Simplified Input Handling:
 o	Assumes corner_pts is already in the correct order (top-left, top-right, bottom-right, bottom-left), as handled in Process_Card.
@@ -1166,16 +1166,16 @@ o	Improved readability with better variable names and streamlined logic.
 Usage Example:
 python
 Copier le code
-// Define corner dimensions
-CORNER_WIDTH = 50
-CORNER_HEIGHT = 70
+    // Define corner dimensions
+    CORNER_WIDTH = 50
+    CORNER_HEIGHT = 70
 
-// Assume `card_reshaped` is the reshaped card image
-corner = Get_Card_Corner(card_reshaped, CORNER_WIDTH, CORNER_HEIGHT)
-if corner is not None:
-    print("Corner extracted successfully!")
-else:
-    print("No corner detected.")
+    // Assume `card_reshaped` is the reshaped card image
+    corner = Get_Card_Corner(card_reshaped, CORNER_WIDTH, CORNER_HEIGHT)
+    if corner is not None:
+        print("Corner extracted successfully!")
+    else:
+        print("No corner detected.")
 This optimized function is more robust, easier to debug, and handles edge cases gracefully.
 4o
  # Vous avez dit :
@@ -1254,23 +1254,23 @@ Le rectangle englobant est redimensionné à une taille standard spécifiée (ou
 Exemple d’Utilisation :
 python
 Copier le code
-// Paramètres pour les dimensions
-CORNER_WIDTH = 50
-CORNER_HEIGHT = 70
-OUTPUT_WIDTH = 100
-OUTPUT_HEIGHT = 150
+    // Paramètres pour les dimensions
+    CORNER_WIDTH = 50
+    CORNER_HEIGHT = 70
+    OUTPUT_WIDTH = 100
+    OUTPUT_HEIGHT = 150
 
-// Appeler la fonction
-corner_image = Get_Card_Corner(card_reshaped, CORNER_WIDTH, CORNER_HEIGHT, OUTPUT_WIDTH, OUTPUT_HEIGHT)
+    // Appeler la fonction
+    corner_image = Get_Card_Corner(card_reshaped, CORNER_WIDTH, CORNER_HEIGHT, OUTPUT_WIDTH, OUTPUT_HEIGHT)
 
-if corner_image is not None:
-    print("Coin de la carte extrait avec succès!")
-else:
-    print("Contours insuffisants détectés dans le coin.")
+    if corner_image is not None:
+        print("Coin de la carte extrait avec succès!")
+    else:
+        print("Contours insuffisants détectés dans le coin.")
 Cette version assure que le rectangle englobant contient les deux éléments clés (rang et famille) et les met en valeur de manière standardisée.
 
 
-  complete this function to draw the bounding rectangle on the output image but for the 2 largest contours
+### complete this function to draw the bounding rectangle on the output image but for the 2 largest contours
     import cv2
     import numpy as np
 
@@ -1318,35 +1318,35 @@ To modify your code to draw the bounding rectangles for the two largest contours
 
 python
 Copier le code
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-// Charger l'image
-image = cv2.imread('Corners/10D.jpg', cv2.IMREAD_COLOR)
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    // Charger l'image
+    image = cv2.imread('Corners/10D.jpg', cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-// Appliquer un flou et détecter les bords
-blur = cv2.GaussianBlur(gray, (5, 5), 0)
-edges = cv2.Canny(blur, 50, 100)
-kernel = np.ones((4, 4))
-dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    // Appliquer un flou et détecter les bords
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blur, 50, 100)
+    kernel = np.ones((4, 4))
+    dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-// Trouver les contours
-contours, hierarchy = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Trier par aire de contour
+    // Trouver les contours
+    contours, hierarchy = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Trier par aire de contour
 
-// Dessiner les boîtes englobantes pour les 2 plus grands contours
-output = image.copy()
-for contour in sorted_contours[:2]:  // Les 2 plus grands contours
-    x, y, contour_width, contour_height = cv2.boundingRect(contour)
-    cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)  // Vert, épaisseur de 2
+    // Dessiner les boîtes englobantes pour les 2 plus grands contours
+    output = image.copy()
+    for contour in sorted_contours[:2]:  // Les 2 plus grands contours
+        x, y, contour_width, contour_height = cv2.boundingRect(contour)
+        cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)  // Vert, épaisseur de 2
 
-// Afficher les résultats
-plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
-plt.title('Contours with Bounding Boxes')
-plt.axis('off')
-plt.show()
+    // Afficher les résultats
+    plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+    plt.title('Contours with Bounding Boxes')
+    plt.axis('off')
+    plt.show()
 Key Changes:
 Contour Sorting: I sorted the contours based on the area using cv2.contourArea.
 Bounding Box for Top 2 Contours: Restricted the loop to the top 2 largest contours using slicing (sorted_contours[:2]).
@@ -1372,61 +1372,61 @@ Here’s the updated code:
 
 python
 Copier le code
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-from skimage.metrics import structural_similarity as ssim
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from skimage.metrics import structural_similarity as ssim
 
-def get_top_bounding_boxes(image_path, top_n=2):
-    """Extract the bounding rectangles for the top N largest contours in the image."""
-    // Load and preprocess the image
-    image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    edges = cv2.Canny(blur, 50, 100)
-    kernel = np.ones((4, 4))
-    dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    def get_top_bounding_boxes(image_path, top_n=2):
+        """Extract the bounding rectangles for the top N largest contours in the image."""
+        // Load and preprocess the image
+        image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        blur = cv2.GaussianBlur(gray, (5, 5), 0)
+        edges = cv2.Canny(blur, 50, 100)
+        kernel = np.ones((4, 4))
+        dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-    // Find contours
-    contours, _ = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Sort by contour area
+        // Find contours
+        contours, _ = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Sort by contour area
 
-    // Extract top N bounding boxes
-    bounding_boxes = [cv2.boundingRect(contour) for contour in sorted_contours[:top_n]]
-    return image, bounding_boxes
+        // Extract top N bounding boxes
+        bounding_boxes = [cv2.boundingRect(contour) for contour in sorted_contours[:top_n]]
+        return image, bounding_boxes
 
-def compare_bounding_boxes(image1_path, image2_path):
-    // Get the bounding boxes for both images
-    image1, boxes1 = get_top_bounding_boxes(image1_path)
-    image2, boxes2 = get_top_bounding_boxes(image2_path)
+    def compare_bounding_boxes(image1_path, image2_path):
+        // Get the bounding boxes for both images
+        image1, boxes1 = get_top_bounding_boxes(image1_path)
+        image2, boxes2 = get_top_bounding_boxes(image2_path)
 
-    comparisons = []
-    for (x1, y1, w1, h1), (x2, y2, w2, h2) in zip(boxes1, boxes2):
-        // Crop the ROIs
-        roi1 = image1[y1:y1+h1, x1:x1+w1]
-        roi2 = image2[y2:y2+h2, x2:x2+w2]
+        comparisons = []
+        for (x1, y1, w1, h1), (x2, y2, w2, h2) in zip(boxes1, boxes2):
+            // Crop the ROIs
+            roi1 = image1[y1:y1+h1, x1:x1+w1]
+            roi2 = image2[y2:y2+h2, x2:x2+w2]
 
-        // Resize ROIs to a common size for comparison
-        common_size = (100, 100)
-        resized_roi1 = cv2.resize(roi1, common_size, interpolation=cv2.INTER_AREA)
-        resized_roi2 = cv2.resize(roi2, common_size, interpolation=cv2.INTER_AREA)
+            // Resize ROIs to a common size for comparison
+            common_size = (100, 100)
+            resized_roi1 = cv2.resize(roi1, common_size, interpolation=cv2.INTER_AREA)
+            resized_roi2 = cv2.resize(roi2, common_size, interpolation=cv2.INTER_AREA)
 
-        // Convert to grayscale for comparison
-        gray_roi1 = cv2.cvtColor(resized_roi1, cv2.COLOR_BGR2GRAY)
-        gray_roi2 = cv2.cvtColor(resized_roi2, cv2.COLOR_BGR2GRAY)
+            // Convert to grayscale for comparison
+            gray_roi1 = cv2.cvtColor(resized_roi1, cv2.COLOR_BGR2GRAY)
+            gray_roi2 = cv2.cvtColor(resized_roi2, cv2.COLOR_BGR2GRAY)
 
-        // Compute similarity (SSIM)
-        score, _ = ssim(gray_roi1, gray_roi2, full=True)
-        comparisons.append(score)
+            // Compute similarity (SSIM)
+            score, _ = ssim(gray_roi1, gray_roi2, full=True)
+            comparisons.append(score)
 
-    return comparisons
+        return comparisons
 
-// Compare bounding rectangles of two images
-image1_path = 'Corners/10D.jpg'
-image2_path = 'Corners/20D.jpg'
-similarity_scores = compare_bounding_boxes(image1_path, image2_path)
+    // Compare bounding rectangles of two images
+    image1_path = 'Corners/10D.jpg'
+    image2_path = 'Corners/20D.jpg'
+    similarity_scores = compare_bounding_boxes(image1_path, image2_path)
 
-print("Similarity scores for bounding rectangles:", similarity_scores)
+    print("Similarity scores for bounding rectangles:", similarity_scores)
 Explanation:
 Bounding Box Extraction (get_top_bounding_boxes):
 
@@ -1457,65 +1457,65 @@ Here’s the updated code:
 
 python
 Copier le code
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-def get_top_bounding_boxes(image_path, top_n=2):
-    """Extract the bounding rectangles for the top N largest contours in the image."""
-    // Load and preprocess the image
-    image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    edges = cv2.Canny(blur, 50, 100)
-    kernel = np.ones((4, 4))
-    dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    def get_top_bounding_boxes(image_path, top_n=2):
+        """Extract the bounding rectangles for the top N largest contours in the image."""
+        // Load and preprocess the image
+        image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        blur = cv2.GaussianBlur(gray, (5, 5), 0)
+        edges = cv2.Canny(blur, 50, 100)
+        kernel = np.ones((4, 4))
+        dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-    // Find contours
-    contours, _ = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Sort by contour area
+        // Find contours
+        contours, _ = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Sort by contour area
 
-    // Extract top N bounding boxes
-    bounding_boxes = [cv2.boundingRect(contour) for contour in sorted_contours[:top_n]]
-    return image, bounding_boxes
+        // Extract top N bounding boxes
+        bounding_boxes = [cv2.boundingRect(contour) for contour in sorted_contours[:top_n]]
+        return image, bounding_boxes
 
-def compare_bounding_boxes_absdiff(image1_path, image2_path):
-    // Get the bounding boxes for both images
-    image1, boxes1 = get_top_bounding_boxes(image1_path)
-    image2, boxes2 = get_top_bounding_boxes(image2_path)
+    def compare_bounding_boxes_absdiff(image1_path, image2_path):
+        // Get the bounding boxes for both images
+        image1, boxes1 = get_top_bounding_boxes(image1_path)
+        image2, boxes2 = get_top_bounding_boxes(image2_path)
 
-    absdiff_scores = []
-    for (x1, y1, w1, h1), (x2, y2, w2, h2) in zip(boxes1, boxes2):
-        // Crop the ROIs
-        roi1 = image1[y1:y1+h1, x1:x1+w1]
-        roi2 = image2[y2:y2+h2, x2:x2+w2]
+        absdiff_scores = []
+        for (x1, y1, w1, h1), (x2, y2, w2, h2) in zip(boxes1, boxes2):
+            // Crop the ROIs
+            roi1 = image1[y1:y1+h1, x1:x1+w1]
+            roi2 = image2[y2:y2+h2, x2:x2+w2]
 
-        // Resize ROIs to a common size for comparison
-        common_size = (100, 100)
-        resized_roi1 = cv2.resize(roi1, common_size, interpolation=cv2.INTER_AREA)
-        resized_roi2 = cv2.resize(roi2, common_size, interpolation=cv2.INTER_AREA)
+            // Resize ROIs to a common size for comparison
+            common_size = (100, 100)
+            resized_roi1 = cv2.resize(roi1, common_size, interpolation=cv2.INTER_AREA)
+            resized_roi2 = cv2.resize(roi2, common_size, interpolation=cv2.INTER_AREA)
 
-        // Compute absolute difference
-        diff = cv2.absdiff(resized_roi1, resized_roi2)
+            // Compute absolute difference
+            diff = cv2.absdiff(resized_roi1, resized_roi2)
 
-        // Sum the differences as a similarity score
-        score = np.sum(diff)
-        absdiff_scores.append(score)
+            // Sum the differences as a similarity score
+            score = np.sum(diff)
+            absdiff_scores.append(score)
 
-        // Optionally display the difference
-        plt.imshow(cv2.cvtColor(diff, cv2.COLOR_BGR2RGB))
-        plt.title(f'Difference for ROI {len(absdiff_scores)}')
-        plt.axis('off')
-        plt.show()
+            // Optionally display the difference
+            plt.imshow(cv2.cvtColor(diff, cv2.COLOR_BGR2RGB))
+            plt.title(f'Difference for ROI {len(absdiff_scores)}')
+            plt.axis('off')
+            plt.show()
 
-    return absdiff_scores
+        return absdiff_scores
 
-// Compare bounding rectangles of two images using absdiff
-image1_path = 'Corners/10D.jpg'
-image2_path = 'Corners/20D.jpg'
-absdiff_scores = compare_bounding_boxes_absdiff(image1_path, image2_path)
+    // Compare bounding rectangles of two images using absdiff
+    image1_path = 'Corners/10D.jpg'
+    image2_path = 'Corners/20D.jpg'
+    absdiff_scores = compare_bounding_boxes_absdiff(image1_path, image2_path)
 
-print("Absolute difference scores for bounding rectangles:", absdiff_scores)
+    print("Absolute difference scores for bounding rectangles:", absdiff_scores)
 Explanation:
 Bounding Box Extraction (get_top_bounding_boxes):
 
@@ -1739,59 +1739,59 @@ Here’s a fixed and clarified version of your function, integrating the compare
 Updated Match_Corners Function
 python
 Copier le code
-def Match_Corners(cards, image, family):
-    """
-    Matches detected cards with family ranks based on corner similarity.
+    def Match_Corners(cards, image, family):
+        """
+        Matches detected cards with family ranks based on corner similarity.
 
-    Args:
-        cards (list): List of contours representing detected cards.
-        image (ndarray): The input image containing the cards.
-        family (list): List of Family_ranks objects representing the family ranks.
+        Args:
+            cards (list): List of contours representing detected cards.
+            image (ndarray): The input image containing the cards.
+            family (list): List of Family_ranks objects representing the family ranks.
 
-    Returns:
-        list: A list of Card objects with identified ranks.
-    """
-    matching_cards = []
-    cards_found = []    
+        Returns:
+            list: A list of Card objects with identified ranks.
+        """
+        matching_cards = []
+        cards_found = []    
 
-    // Loop through each detected card
-    for card in cards:
-        processed_card = Process_Card(card, image)  // Extract card features
-        card_corner_zoom = Get_Card_Corner(processed_card.img)  // Get zoomed-in corner
-        cards_found.append(card_corner_zoom)
+        // Loop through each detected card
+        for card in cards:
+            processed_card = Process_Card(card, image)  // Extract card features
+            card_corner_zoom = Get_Card_Corner(processed_card.img)  // Get zoomed-in corner
+            cards_found.append(card_corner_zoom)
 
-        best_match = None  // To store the best match for the current card
-        best_diff_value_1 = float('inf')  // Initialize with a large value
-        best_diff_value_2 = float('inf')  // Initialize with a large value
+            best_match = None  // To store the best match for the current card
+            best_diff_value_1 = float('inf')  // Initialize with a large value
+            best_diff_value_2 = float('inf')  // Initialize with a large value
 
-        // Compare the card corner with each family rank
-        for fam in family:
-            family_img = fam.img
-            if family_img is None:
-                continue
-            
-            // Use compare_bounding_boxes_absdiff to get absdiff scores
-            absdiff_scores = compare_bounding_boxes_absdiff(family_img, card_corner_zoom)
-            
-            // Skip if scores exceed the match threshold
-            if absdiff_scores[0] >= MATCH_VALUE or absdiff_scores[1] >= MATCH_VALUE:
-                continue
+            // Compare the card corner with each family rank
+            for fam in family:
+                family_img = fam.img
+                if family_img is None:
+                    continue
+                
+                // Use compare_bounding_boxes_absdiff to get absdiff scores
+                absdiff_scores = compare_bounding_boxes_absdiff(family_img, card_corner_zoom)
+                
+                // Skip if scores exceed the match threshold
+                if absdiff_scores[0] >= MATCH_VALUE or absdiff_scores[1] >= MATCH_VALUE:
+                    continue
 
-            // Update the best match if a lower diff value is found
-            if absdiff_scores[0] < best_diff_value_1 or absdiff_scores[1] < best_diff_value_2:
-                best_diff_value_1 = absdiff_scores[0]
-                best_diff_value_2 = absdiff_scores[1]
-                best_match = fam.rank
+                // Update the best match if a lower diff value is found
+                if absdiff_scores[0] < best_diff_value_1 or absdiff_scores[1] < best_diff_value_2:
+                    best_diff_value_1 = absdiff_scores[0]
+                    best_diff_value_2 = absdiff_scores[1]
+                    best_match = fam.rank
 
-        // After checking all family ranks, assign the best match
-        if best_match is not None:
-            processed_card.rank = best_match
+            // After checking all family ranks, assign the best match
+            if best_match is not None:
+                processed_card.rank = best_match
 
-            // Avoid adding duplicates by checking if rank already exists
-            if not any(c.rank == processed_card.rank for c in matching_cards):
-                matching_cards.append(processed_card)
+                // Avoid adding duplicates by checking if rank already exists
+                if not any(c.rank == processed_card.rank for c in matching_cards):
+                    matching_cards.append(processed_card)
 
-    return matching_cards, cards_found
+        return matching_cards, cards_found
 Key Changes and Explanations:
 Comparison with compare_bounding_boxes_absdiff:
 
@@ -1812,11 +1812,11 @@ MATCH_VALUE is a predefined constant for the maximum acceptable absdiff score.
 Example Usage:
 python
 Copier le code
-// Call Match_Corners with detected cards, input image, and family ranks
-matched_cards, found_cards = Match_Corners(cards, input_image, family_ranks)
+    // Call Match_Corners with detected cards, input image, and family ranks
+    matched_cards, found_cards = Match_Corners(cards, input_image, family_ranks)
 
-// Print or process results
-print("Matched Cards:", [card.rank for card in matched_cards])
+    // Print or process results
+    print("Matched Cards:", [card.rank for card in matched_cards])
 Let me know if you need additional clarifications or modifications!
 
 
@@ -1889,55 +1889,55 @@ We'll ensure both images are in grayscale before comparison:
 
 python
 Copier le code
-import cv2
-import numpy as np
+    import cv2
+    import numpy as np
 
-def compare_bounding_boxes_absdiff(image1, image2):
-    """
-    Compare the two images by extracting the largest bounding boxes and 
-    computing the absolute difference (absdiff) between the two images.
-    
-    Args:
-        image1 (ndarray): First input image.
-        image2 (ndarray): Second input image.
+    def compare_bounding_boxes_absdiff(image1, image2):
+        """
+        Compare the two images by extracting the largest bounding boxes and 
+        computing the absolute difference (absdiff) between the two images.
         
-    Returns:
-        list: A list of absolute difference scores for bounding boxes.
-    """
-    
-    // Convert both images to grayscale if they are not already
-    if len(image1.shape) == 3:
-        image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
-    if len(image2.shape) == 3:
-        image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
-    
-    // Get the bounding boxes for both images (assuming 'get_top_bounding_boxes' returns the correct boxes)
-    image1, boxes1 = get_top_bounding_boxes(image1)
-    image2, boxes2 = get_top_bounding_boxes(image2)
-    
-    absdiff_scores = []
-    
-    // Make sure both images have at least one bounding box
-    if len(boxes1) > 0 and len(boxes2) > 0:
-        // Compare the first two bounding boxes (if they exist)
-        for (x1, y1, w1, h1), (x2, y2, w2, h2) in zip(boxes1, boxes2):
-            // Crop the ROIs
-            roi1 = image1[y1:y1+h1, x1:x1+w1]
-            roi2 = image2[y2:y2+h2, x2:x2+w2]
+        Args:
+            image1 (ndarray): First input image.
+            image2 (ndarray): Second input image.
+            
+        Returns:
+            list: A list of absolute difference scores for bounding boxes.
+        """
+        
+        // Convert both images to grayscale if they are not already
+        if len(image1.shape) == 3:
+            image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
+        if len(image2.shape) == 3:
+            image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
+        
+        // Get the bounding boxes for both images (assuming 'get_top_bounding_boxes' returns the correct boxes)
+        image1, boxes1 = get_top_bounding_boxes(image1)
+        image2, boxes2 = get_top_bounding_boxes(image2)
+        
+        absdiff_scores = []
+        
+        // Make sure both images have at least one bounding box
+        if len(boxes1) > 0 and len(boxes2) > 0:
+            // Compare the first two bounding boxes (if they exist)
+            for (x1, y1, w1, h1), (x2, y2, w2, h2) in zip(boxes1, boxes2):
+                // Crop the ROIs
+                roi1 = image1[y1:y1+h1, x1:x1+w1]
+                roi2 = image2[y2:y2+h2, x2:x2+w2]
 
-            // Resize the ROIs to a common size for comparison
-            common_size = (100, 100)
-            resized_roi1 = cv2.resize(roi1, common_size, interpolation=cv2.INTER_AREA)
-            resized_roi2 = cv2.resize(roi2, common_size, interpolation=cv2.INTER_AREA)
+                // Resize the ROIs to a common size for comparison
+                common_size = (100, 100)
+                resized_roi1 = cv2.resize(roi1, common_size, interpolation=cv2.INTER_AREA)
+                resized_roi2 = cv2.resize(roi2, common_size, interpolation=cv2.INTER_AREA)
 
-            // Compute absolute difference
-            diff = cv2.absdiff(resized_roi1, resized_roi2)
+                // Compute absolute difference
+                diff = cv2.absdiff(resized_roi1, resized_roi2)
 
-            // Store the difference score (sum of pixel-wise differences)
-            score = np.sum(diff)
-            absdiff_scores.append(score)
-    
-    return absdiff_scores
+                // Store the difference score (sum of pixel-wise differences)
+                score = np.sum(diff)
+                absdiff_scores.append(score)
+        
+        return absdiff_scores
 Explanation of Changes:
 Convert Images to Grayscale:
 
@@ -1960,8 +1960,8 @@ Debugging Tips:
 If you still encounter issues, you can check the shape of the images passed to cv2.absdiff by printing them:
 python
 Copier le code
-print(image1.shape)  // Check if the image is grayscale (should print (height, width))
-print(image2.shape)  // Same here
+    print(image1.shape)  // Check if the image is grayscale (should print (height, width))
+    print(image2.shape)  // Same here
 Let me know if this helps or if you need further adjustments!
     sometemis the 2 contour i want to isolate are inside another contour that i don't want
     import cv2
@@ -2012,46 +2012,46 @@ Here’s the updated code:
 
 python
 Copier le code
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-// Load the image
-image = cv2.imread('Corners/JH.jpg', cv2.IMREAD_COLOR)
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    // Load the image
+    image = cv2.imread('Corners/JH.jpg', cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-// Apply Gaussian Blur and detect edges
-blur = cv2.GaussianBlur(gray, (5, 5), 0)
-edges = cv2.Canny(blur, 50, 100)
-kernel = np.ones((4, 4), np.uint8)
-dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    // Apply Gaussian Blur and detect edges
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blur, 50, 100)
+    kernel = np.ones((4, 4), np.uint8)
+    dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-// Find contours and hierarchy
-contours, hierarchy = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-hierarchy = hierarchy[0]  // Get the hierarchy array
+    // Find contours and hierarchy
+    contours, hierarchy = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    hierarchy = hierarchy[0]  // Get the hierarchy array
 
-// Filter contours based on parent relationship
-filtered_contours = []
-for i, h in enumerate(hierarchy):
-    parent = h[3]
-    // If the contour has no parent or meets a specific condition
-    if parent == -1 or cv2.contourArea(contours[parent]) > 1000:  // Example condition for filtering
-        filtered_contours.append(contours[i])
+    // Filter contours based on parent relationship
+    filtered_contours = []
+    for i, h in enumerate(hierarchy):
+        parent = h[3]
+        // If the contour has no parent or meets a specific condition
+        if parent == -1 or cv2.contourArea(contours[parent]) > 1000:  // Example condition for filtering
+            filtered_contours.append(contours[i])
 
-// Sort the filtered contours by area
-filtered_contours = sorted(filtered_contours, key=cv2.contourArea, reverse=True)[:2]  // Top 2 largest
+    // Sort the filtered contours by area
+    filtered_contours = sorted(filtered_contours, key=cv2.contourArea, reverse=True)[:2]  // Top 2 largest
 
-// Draw bounding boxes for the filtered contours
-output = image.copy()
-for contour in filtered_contours:
-    x, y, contour_width, contour_height = cv2.boundingRect(contour)
-    cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)
+    // Draw bounding boxes for the filtered contours
+    output = image.copy()
+    for contour in filtered_contours:
+        x, y, contour_width, contour_height = cv2.boundingRect(contour)
+        cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)
 
-// Display the result
-plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
-plt.title('Filtered Contours with Bounding Boxes')
-plt.axis('off')
-plt.show()
+    // Display the result
+    plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+    plt.title('Filtered Contours with Bounding Boxes')
+    plt.axis('off')
+    plt.show()
 Key Adjustments:
 Filter using hierarchy:
 
@@ -2091,57 +2091,57 @@ Use area thresholds or exclusion zones to isolate specific contours.
 Updated Code:
 python
 Copier le code
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-// Load the image
-image = cv2.imread('Corners/JH.jpg', cv2.IMREAD_COLOR)
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    // Load the image
+    image = cv2.imread('Corners/JH.jpg', cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-// Apply Gaussian Blur and detect edges
-blur = cv2.GaussianBlur(gray, (5, 5), 0)
-edges = cv2.Canny(blur, 50, 100)
-kernel = np.ones((4, 4), np.uint8)
-dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    // Apply Gaussian Blur and detect edges
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blur, 50, 100)
+    kernel = np.ones((4, 4), np.uint8)
+    dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-// Find contours
-contours, _ = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    // Find contours
+    contours, _ = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-// Extract bounding boxes and filter contours
-bounding_boxes = [cv2.boundingRect(contour) for contour in contours]
-filtered_contours = []
+    // Extract bounding boxes and filter contours
+    bounding_boxes = [cv2.boundingRect(contour) for contour in contours]
+    filtered_contours = []
 
-for i, box in enumerate(bounding_boxes):
-    x, y, w, h = box
-    is_nested = False
+    for i, box in enumerate(bounding_boxes):
+        x, y, w, h = box
+        is_nested = False
 
-    // Check if the current bounding box is inside another
-    for j, other_box in enumerate(bounding_boxes):
-        if i != j:
-            x2, y2, w2, h2 = other_box
-            if (x > x2 and y > y2 and (x + w) < (x2 + w2) and (y + h) < (y2 + h2)):
-                is_nested = True
-                break
+        // Check if the current bounding box is inside another
+        for j, other_box in enumerate(bounding_boxes):
+            if i != j:
+                x2, y2, w2, h2 = other_box
+                if (x > x2 and y > y2 and (x + w) < (x2 + w2) and (y + h) < (y2 + h2)):
+                    is_nested = True
+                    break
 
-    // Keep contours that are not nested
-    if not is_nested:
-        filtered_contours.append(contours[i])
+        // Keep contours that are not nested
+        if not is_nested:
+            filtered_contours.append(contours[i])
 
-// Sort the filtered contours by area and select the largest two
-filtered_contours = sorted(filtered_contours, key=cv2.contourArea, reverse=True)[:2]
+    // Sort the filtered contours by area and select the largest two
+    filtered_contours = sorted(filtered_contours, key=cv2.contourArea, reverse=True)[:2]
 
-// Draw bounding boxes for the filtered contours
-output = image.copy()
-for contour in filtered_contours:
-    x, y, contour_width, contour_height = cv2.boundingRect(contour)
-    cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)
+    // Draw bounding boxes for the filtered contours
+    output = image.copy()
+    for contour in filtered_contours:
+        x, y, contour_width, contour_height = cv2.boundingRect(contour)
+        cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)
 
-// Display the result
-plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
-plt.title('Filtered Contours with Bounding Boxes')
-plt.axis('off')
-plt.show()
+    // Display the result
+    plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+    plt.title('Filtered Contours with Bounding Boxes')
+    plt.axis('off')
+    plt.show()
 Explanation:
 Bounding Box Comparison:
 
@@ -2225,60 +2225,60 @@ Here’s the updated code:
 
 python
 Copier le code
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-// Load the image
-image = cv2.imread('Corners/QH.jpg', cv2.IMREAD_COLOR)
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    // Load the image
+    image = cv2.imread('Corners/QH.jpg', cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-// Apply Gaussian Blur and detect edges
-blur = cv2.GaussianBlur(gray, (5, 5), 0)
-edges = cv2.Canny(blur, 50, 100)
-kernel = np.ones((4, 4), np.uint8)
-dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    // Apply Gaussian Blur and detect edges
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blur, 50, 100)
+    kernel = np.ones((4, 4), np.uint8)
+    dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-// Find contours
-contours, _ = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    // Find contours
+    contours, _ = cv2.findContours(dial, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-// Sort contours by area
-sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    // Sort contours by area
+    sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
-// Check if second and third largest contours are nested within the largest contour
-if len(sorted_contours) >= 3:
-    // Get bounding rectangle of the largest contour
-    x1, y1, w1, h1 = cv2.boundingRect(sorted_contours[0])
-    
-    // Get bounding rectangles of the second and third largest contours
-    x2, y2, w2, h2 = cv2.boundingRect(sorted_contours[1])
-    x3, y3, w3, h3 = cv2.boundingRect(sorted_contours[2])
+    // Check if second and third largest contours are nested within the largest contour
+    if len(sorted_contours) >= 3:
+        // Get bounding rectangle of the largest contour
+        x1, y1, w1, h1 = cv2.boundingRect(sorted_contours[0])
+        
+        // Get bounding rectangles of the second and third largest contours
+        x2, y2, w2, h2 = cv2.boundingRect(sorted_contours[1])
+        x3, y3, w3, h3 = cv2.boundingRect(sorted_contours[2])
 
-    // Check if the second and third largest contours are nested within the largest
-    second_nested = (x2 > x1 and y2 > y1 and (x2 + w2) < (x1 + w1) and (y2 + h2) < (y1 + h1))
-    third_nested = (x3 > x1 and y3 > y1 and (x3 + w3) < (x1 + w1) and (y3 + h3) < (y1 + h1))
+        // Check if the second and third largest contours are nested within the largest
+        second_nested = (x2 > x1 and y2 > y1 and (x2 + w2) < (x1 + w1) and (y2 + h2) < (y1 + h1))
+        third_nested = (x3 > x1 and y3 > y1 and (x3 + w3) < (x1 + w1) and (y3 + h3) < (y1 + h1))
 
-    // If both are nested, use the second and third largest contours
-    if second_nested and third_nested:
-        filtered_contours = [sorted_contours[1], sorted_contours[2]]
+        // If both are nested, use the second and third largest contours
+        if second_nested and third_nested:
+            filtered_contours = [sorted_contours[1], sorted_contours[2]]
+        else:
+            // Otherwise, use the largest two contours
+            filtered_contours = [sorted_contours[0], sorted_contours[1]]
     else:
-        // Otherwise, use the largest two contours
-        filtered_contours = [sorted_contours[0], sorted_contours[1]]
-else:
-    // If there are fewer than 3 contours, use as many as available
-    filtered_contours = sorted_contours[:2]
+        // If there are fewer than 3 contours, use as many as available
+        filtered_contours = sorted_contours[:2]
 
-// Draw bounding boxes for the filtered contours
-output = image.copy()
-for contour in filtered_contours:
-    x, y, contour_width, contour_height = cv2.boundingRect(contour)
-    cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)
+    // Draw bounding boxes for the filtered contours
+    output = image.copy()
+    for contour in filtered_contours:
+        x, y, contour_width, contour_height = cv2.boundingRect(contour)
+        cv2.rectangle(output, (x, y), (x + contour_width, y + contour_height), (0, 255, 0), 2)
 
-// Display the result
-plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
-plt.title('Filtered Contours with Bounding Boxes')
-plt.axis('off')
-plt.show()
+    // Display the result
+    plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+    plt.title('Filtered Contours with Bounding Boxes')
+    plt.axis('off')
+    plt.show()
 Key Changes:
 Bounding Rectangle Check:
 
@@ -2336,37 +2336,37 @@ Examples
 Resize to a Specific Size
 python
 Copier le code
-import cv2
+    import cv2
 
-// Load the image
-image = cv2.imread('image.jpg')
+    // Load the image
+    image = cv2.imread('image.jpg')
 
-// Resize to a fixed size
-resized_image = cv2.resize(image, (200, 300))  // (width, height)
+    // Resize to a fixed size
+    resized_image = cv2.resize(image, (200, 300))  // (width, height)
 
-cv2.imshow('Resized Image', resized_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    cv2.imshow('Resized Image', resized_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 Resize by Scaling Factor
 python
 Copier le code
-// Resize by half in both dimensions
-resized_image = cv2.resize(image, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
+    // Resize by half in both dimensions
+    resized_image = cv2.resize(image, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
 
-cv2.imshow('Resized Image', resized_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    cv2.imshow('Resized Image', resized_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 Notes
 Aspect Ratio:
 
 When resizing with a specific dsize, ensure the new size maintains the aspect ratio if required. For example:
 python
 Copier le code
-original_height, original_width = image.shape[:2]
-aspect_ratio = original_width / original_height
-new_width = 200
-new_height = int(new_width / aspect_ratio)
-resized_image = cv2.resize(image, (new_width, new_height))
+    original_height, original_width = image.shape[:2]
+    aspect_ratio = original_width / original_height
+    new_width = 200
+    new_height = int(new_width / aspect_ratio)
+    resized_image = cv2.resize(image, (new_width, new_height))
 Interpolation Choice:
 
 Use cv2.INTER_AREA for downsizing and cv2.INTER_CUBIC or cv2.INTER_LANCZOS4 for enlarging.
@@ -2511,37 +2511,37 @@ Here’s your function with added debugging:
 
 python
 Copier le code
-import os
-import cv2
+    import os
+    import cv2
 
-class Rank:
-    def __init__(self):
-        self.rank = None
-        self.img = None
+    class Rank:
+        def __init__(self):
+            self.rank = None
+            self.img = None
 
-def Load_Ranks(filepath):
-    family_ranks = []
-    ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+    def Load_Ranks(filepath):
+        family_ranks = []
+        ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 
-    for rank in ranks:
-        rank_object = Rank()
-        rank_object.rank = rank
-        filename = f"{rank}.jpg"
-        img_path = os.path.join(filepath, filename)
+        for rank in ranks:
+            rank_object = Rank()
+            rank_object.rank = rank
+            filename = f"{rank}.jpg"
+            img_path = os.path.join(filepath, filename)
 
-        // Debugging: Print the file path
-        print(f"Looking for: {img_path}")
+            // Debugging: Print the file path
+            print(f"Looking for: {img_path}")
 
-        // Load image and handle potential errors
-        rank_object.img = cv2.imread(img_path)
-        if rank_object.img is None:
-            print(f"Warning: Image {img_path} could not be loaded.")
-        else:
-            print(f"Loaded: {img_path}")
+            // Load image and handle potential errors
+            rank_object.img = cv2.imread(img_path)
+            if rank_object.img is None:
+                print(f"Warning: Image {img_path} could not be loaded.")
+            else:
+                print(f"Loaded: {img_path}")
 
-        family_ranks.append(rank_object)
+            family_ranks.append(rank_object)
 
-    return family_ranks
+        return family_ranks
 
 // Call the function and test
 Suits = Load_Ranks('Ranks/')
@@ -2584,43 +2584,43 @@ Here’s how your code can be adapted:
 Modified Code
 python
 Copier le code
-import importlib
-import cv2
-from Functions import *
-import matplotlib.pyplot as plt
+    import importlib
+    import cv2
+    from Functions import *
+    import matplotlib.pyplot as plt
 
-// Reload Functions module (if needed for dynamic updates)
-importlib.reload(Functions)
+    // Reload Functions module (if needed for dynamic updates)
+    importlib.reload(Functions)
 
-// Load the main image
-image = cv2.imread('Full family/M.jpg')
+    // Load the main image
+    image = cv2.imread('Full family/M.jpg')
 
-// Find cards in the image
-cards, output = Find_cards(image)
+    // Find cards in the image
+    cards, output = Find_cards(image)
 
-// Initialize a list to store zoomed-in corners
-zoomed_corners = []
+    // Initialize a list to store zoomed-in corners
+    zoomed_corners = []
 
-// Process up to three cards (change range to select more/less cards)
-for i in range(min(3, len(cards))):  // Ensures we don't exceed the number of detected cards
-    card = Process_Card(cards[i], image)
-    card_corner_zoom, rank, suit = Get_Card_Corner(card.img)
-    
-    // Save the zoomed corner (optional)
-    Save_Corner(card_corner_zoom, f'Test_{i+1}')
-    
-    // Append to list for visualization
-    zoomed_corners.append(card_corner_zoom)
+    // Process up to three cards (change range to select more/less cards)
+    for i in range(min(3, len(cards))):  // Ensures we don't exceed the number of detected cards
+        card = Process_Card(cards[i], image)
+        card_corner_zoom, rank, suit = Get_Card_Corner(card.img)
+        
+        // Save the zoomed corner (optional)
+        Save_Corner(card_corner_zoom, f'Test_{i+1}')
+        
+        // Append to list for visualization
+        zoomed_corners.append(card_corner_zoom)
 
-// Visualize the zoomed regions
-plt.figure(figsize=(15, 5))
-for idx, zoom in enumerate(zoomed_corners):
-    plt.subplot(1, len(zoomed_corners), idx + 1)  // Arrange in a row
-    plt.imshow(cv2.cvtColor(zoom, cv2.COLOR_BGR2RGB))  // Convert color for display
-    plt.title(f'Card Corner {idx + 1}')
-    plt.axis('off')
+    // Visualize the zoomed regions
+    plt.figure(figsize=(15, 5))
+    for idx, zoom in enumerate(zoomed_corners):
+        plt.subplot(1, len(zoomed_corners), idx + 1)  // Arrange in a row
+        plt.imshow(cv2.cvtColor(zoom, cv2.COLOR_BGR2RGB))  // Convert color for display
+        plt.title(f'Card Corner {idx + 1}')
+        plt.axis('off')
 
-plt.show()
+    plt.show()
 Explanation of Modifications:
 Iterating Over Cards:
 
@@ -2659,52 +2659,52 @@ To display the card corner zoom, rank, and suit for a selected card, you can mod
 Modified Code
 python
 Copier le code
-import importlib
-import cv2
-from Functions import *
-import matplotlib.pyplot as plt
+    import importlib
+    import cv2
+    from Functions import *
+    import matplotlib.pyplot as plt
 
-// Reload Functions module (if needed for dynamic updates)
-importlib.reload(Functions)
+    // Reload Functions module (if needed for dynamic updates)
+    importlib.reload(Functions)
 
-// Load the main image
-image = cv2.imread('Full family/M.jpg')
+    // Load the main image
+    image = cv2.imread('Full family/M.jpg')
 
-// Find cards in the image
-cards, output = Find_cards(image)
+    // Find cards in the image
+    cards, output = Find_cards(image)
 
-// Select a specific card to process
-card = Process_Card(cards[2], image)  // Change the index to select a different card
+    // Select a specific card to process
+    card = Process_Card(cards[2], image)  // Change the index to select a different card
 
-// Get the card's corner zoom, rank, and suit
-card_corner_zoom, rank, suit = Get_Card_Corner(card.img)
+    // Get the card's corner zoom, rank, and suit
+    card_corner_zoom, rank, suit = Get_Card_Corner(card.img)
 
-// Save the zoomed corner (optional)
-Save_Corner(card_corner_zoom, 'Test')
+    // Save the zoomed corner (optional)
+    Save_Corner(card_corner_zoom, 'Test')
 
-// Display the corner zoom, rank, and suit
-plt.figure(figsize=(10, 5))
+    // Display the corner zoom, rank, and suit
+    plt.figure(figsize=(10, 5))
 
-// Display the zoomed corner
-plt.subplot(1, 3, 1)
-plt.imshow(cv2.cvtColor(card_corner_zoom, cv2.COLOR_BGR2RGB))  // Convert color for display
-plt.title('Card Corner Zoom')
-plt.axis('off')
+    // Display the zoomed corner
+    plt.subplot(1, 3, 1)
+    plt.imshow(cv2.cvtColor(card_corner_zoom, cv2.COLOR_BGR2RGB))  // Convert color for display
+    plt.title('Card Corner Zoom')
+    plt.axis('off')
 
-// Display the rank
-plt.subplot(1, 3, 2)
-plt.text(0.5, 0.5, rank, fontsize=20, ha='center', va='center')
-plt.title('Rank')
-plt.axis('off')
+    // Display the rank
+    plt.subplot(1, 3, 2)
+    plt.text(0.5, 0.5, rank, fontsize=20, ha='center', va='center')
+    plt.title('Rank')
+    plt.axis('off')
 
-// Display the suit
-plt.subplot(1, 3, 3)
-plt.text(0.5, 0.5, suit, fontsize=20, ha='center', va='center')
-plt.title('Suit')
-plt.axis('off')
+    // Display the suit
+    plt.subplot(1, 3, 3)
+    plt.text(0.5, 0.5, suit, fontsize=20, ha='center', va='center')
+    plt.title('Suit')
+    plt.axis('off')
 
-plt.tight_layout()
-plt.show()
+    plt.tight_layout()
+    plt.show()
 Explanation:
 Single Card Processing:
 
@@ -2797,129 +2797,129 @@ Compute and print the difference scores.
 Generalized Function
 python
 Copier le code
-def process_card_and_compute_scores(image_path, rank_index, suit_index, card_index):
-    """
-    Generalized function to load ranks and suits, process a specific card, 
-    and compute difference scores for its rank and suit.
-    
-    Parameters:
-    - image_path (str): Path to the main image containing cards.
-    - rank_index (int): Index of the rank to compare.
-    - suit_index (int): Index of the suit to compare.
-    - card_index (int): Index of the card to process.
+    def process_card_and_compute_scores(image_path, rank_index, suit_index, card_index):
+        """
+        Generalized function to load ranks and suits, process a specific card, 
+        and compute difference scores for its rank and suit.
+        
+        Parameters:
+        - image_path (str): Path to the main image containing cards.
+        - rank_index (int): Index of the rank to compare.
+        - suit_index (int): Index of the suit to compare.
+        - card_index (int): Index of the card to process.
 
-    Returns:
-    - (float, float): Difference scores for rank and suit.
-    """
-    // Load Ranks and Suits
-    Ranks = Load_Ranks('Ranks/')
-    Suits = Load_Suits('Suits/')
+        Returns:
+        - (float, float): Difference scores for rank and suit.
+        """
+        // Load Ranks and Suits
+        Ranks = Load_Ranks('Ranks/')
+        Suits = Load_Suits('Suits/')
 
-    // Extract specific rank and suit images
-    imageR = Ranks[rank_index].img
-    imageS = Suits[suit_index].img
+        // Extract specific rank and suit images
+        imageR = Ranks[rank_index].img
+        imageS = Suits[suit_index].img
 
-    // Process zoom for reference rank and suit
-    r1 = process_zoom(imageR)
-    s1 = process_zoom(imageS)
+        // Process zoom for reference rank and suit
+        r1 = process_zoom(imageR)
+        s1 = process_zoom(imageS)
 
-    // Load the card image
-    image = cv2.imread(image_path)
-    
-    // Find and process a specific card
-    cards, output = Find_cards(image)
-    card = Process_Card(cards[card_index], image)
+        // Load the card image
+        image = cv2.imread(image_path)
+        
+        // Find and process a specific card
+        cards, output = Find_cards(image)
+        card = Process_Card(cards[card_index], image)
 
-    // Get the card's corner zoom, rank, and suit
-    card_corner_zoom, rank, suit = Get_Card_Corner(card.img)
-    
-    // Process zoom for the detected rank and suit
-    r2 = process_zoom(rank)
-    s2 = process_zoom(suit)
+        // Get the card's corner zoom, rank, and suit
+        card_corner_zoom, rank, suit = Get_Card_Corner(card.img)
+        
+        // Process zoom for the detected rank and suit
+        r2 = process_zoom(rank)
+        s2 = process_zoom(suit)
 
-    // Compute and return difference scores
-    rank_score = compute_diff_score(r1, r2, imageR, rank)
-    suit_score = compute_diff_score(s1, s2, imageS, suit)
-    
-    return rank_score, suit_score
+        // Compute and return difference scores
+        rank_score = compute_diff_score(r1, r2, imageR, rank)
+        suit_score = compute_diff_score(s1, s2, imageS, suit)
+        
+        return rank_score, suit_score
 Example Usage
 python
 Copier le code
-// Specify parameters
-image_path = 'Full family/H.jpg'  // Path to the image with cards
-rank_index = 4  // Index of the rank to compare
-suit_index = 0  // Index of the suit to compare
-card_index = 6  // Index of the card to process in the detected cards
+    // Specify parameters
+    image_path = 'Full family/H.jpg'  // Path to the image with cards
+    rank_index = 4  // Index of the rank to compare
+    suit_index = 0  // Index of the suit to compare
+    card_index = 6  // Index of the card to process in the detected cards
 
-// Call the function
-rank_score, suit_score = process_card_and_compute_scores(image_path, rank_index, suit_index, card_index)
+    // Call the function
+    rank_score, suit_score = process_card_and_compute_scores(image_path, rank_index, suit_index, card_index)
 
-// Print the results
-print("Rank Difference Score:", rank_score)
-print("Suit Difference Score:", suit_score)
-Explanation
-Parameters:
+    // Print the results
+    print("Rank Difference Score:", rank_score)
+    print("Suit Difference Score:", suit_score)
+    Explanation
+    Parameters:
 
-image_path: Path to the image containing cards.
-rank_index and suit_index: Specify which rank and suit images to use for comparison.
-card_index: Specify which detected card to process.
-Workflow:
+    image_path: Path to the image containing cards.
+    rank_index and suit_index: Specify which rank and suit images to use for comparison.
+    card_index: Specify which detected card to process.
+    Workflow:
 
-Load the ranks and suits using Load_Ranks() and Load_Suits().
-Process and zoom the reference rank and suit.
-Process a card from the image and extract its zoomed corner, rank, and suit.
-Compute difference scores using compute_diff_score().
-Return Values:
+    Load the ranks and suits using Load_Ranks() and Load_Suits().
+    Process and zoom the reference rank and suit.
+    Process a card from the image and extract its zoomed corner, rank, and suit.
+    Compute difference scores using compute_diff_score().
+    Return Values:
 
-The function returns the rank and suit difference scores as a tuple (rank_score, suit_score).
+    The function returns the rank and suit difference scores as a tuple (rank_score, suit_score).
 
-adapt this function to do the same with suits that it does for ranks
-def Match_Corners(cards, image, ranks, suits):
-    """
-    Matches detected cards with family ranks based on corner similarity.
+    adapt this function to do the same with suits that it does for ranks
+    def Match_Corners(cards, image, ranks, suits):
+        """
+        Matches detected cards with family ranks based on corner similarity.
 
-    Args:
-        cards (list): List of contours representing detected cards.
-        image (ndarray): The input image containing the cards.
-        family (list): List of Family_ranks objects representing the family ranks.
+        Args:
+            cards (list): List of contours representing detected cards.
+            image (ndarray): The input image containing the cards.
+            family (list): List of Family_ranks objects representing the family ranks.
 
-    Returns:
-        list: A list of Card objects with identified ranks.
-    """
-    matching_cards = []
-    cards_found = []    
+        Returns:
+            list: A list of Card objects with identified ranks.
+        """
+        matching_cards = []
+        cards_found = []    
 
-    // Loop through each detected card
-    for card in cards:
-        processed_card = Process_Card(card, image)  // Extract card features
-        _, card_rank, card_suit = Get_Card_Corner(processed_card.img)  // Get zoomed-in corner
-        cards_found.append(processed_card)
+        // Loop through each detected card
+        for card in cards:
+            processed_card = Process_Card(card, image)  // Extract card features
+            _, card_rank, card_suit = Get_Card_Corner(processed_card.img)  // Get zoomed-in corner
+            cards_found.append(processed_card)
 
-        best_match_rank = None  // To store the best match for the current card
-        best_match_suit = None  // To store the best match for the current card
-        best_diff_value_rank = float('inf')  // Initialize with a large value
-        best_diff_value_suit = float('inf')  // Initialize with a large value
+            best_match_rank = None  // To store the best match for the current card
+            best_match_suit = None  // To store the best match for the current card
+            best_diff_value_rank = float('inf')  // Initialize with a large value
+            best_diff_value_suit = float('inf')  // Initialize with a large value
 
-        // Compare the card corner with each family rank
-        for rank in ranks:
-            rank_img = rank.img
-            if rank_img is None:
-                continue
-            
-            // Use compare_bounding_boxes_absdiff to get absdiff scores
-            absdiff_scores = compute_diff_score(rank_img, card_rank)
+            // Compare the card corner with each family rank
+            for rank in ranks:
+                rank_img = rank.img
+                if rank_img is None:
+                    continue
+                
+                // Use compare_bounding_boxes_absdiff to get absdiff scores
+                absdiff_scores = compute_diff_score(rank_img, card_rank)
 
-            // Update the best match if a lower diff value is found
-            if absdiff_scores < best_diff_value_rank :
-                best_diff_value_rank = absdiff_scores
-                best_match_rank = rank.rank
+                // Update the best match if a lower diff value is found
+                if absdiff_scores < best_diff_value_rank :
+                    best_diff_value_rank = absdiff_scores
+                    best_match_rank = rank.rank
 
-        // After checking all family ranks, assign the best match
-        if best_match_rank is not None:
-            processed_card.rank = best_match_rank
-            matching_cards.append(processed_card)
+            // After checking all family ranks, assign the best match
+            if best_match_rank is not None:
+                processed_card.rank = best_match_rank
+                matching_cards.append(processed_card)
 
-    return matching_cards, cards_found
+        return matching_cards, cards_found
 # Chatgpt a dit :
 ChatGPT
 To adapt this function to match card suits in the same way it matches ranks, you need to add a similar loop and comparison logic for suits. Below is the updated code:
@@ -3123,42 +3123,42 @@ To display the contours inside their bounding rectangles, you can modify the pro
 
 python
 Copier le code
-def process_zoom_with_visualization(zoom_region):
-    // Preprocess the image
-    blur = cv2.GaussianBlur(zoom_region, (5, 5), 0)
-    edges = cv2.Canny(blur, 50, 100)
-    kernel = np.ones((3, 3))
-    dial = cv2.dilate(edges, kernel=kernel, iterations=2)
+    def process_zoom_with_visualization(zoom_region):
+        // Preprocess the image
+        blur = cv2.GaussianBlur(zoom_region, (5, 5), 0)
+        edges = cv2.Canny(blur, 50, 100)
+        kernel = np.ones((3, 3))
+        dial = cv2.dilate(edges, kernel=kernel, iterations=2)
 
-    // Find contours
-    contours, _ = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Sort by contour area
+        // Find contours
+        contours, _ = cv2.findContours(dial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)  // Sort by contour area
 
-    // Create a copy of the zoom region to draw on
-    visualization = zoom_region.copy()
-    if len(visualization.shape) == 2:  // If grayscale, convert to BGR for color visualization
-        visualization = cv2.cvtColor(visualization, cv2.COLOR_GRAY2BGR)
+        // Create a copy of the zoom region to draw on
+        visualization = zoom_region.copy()
+        if len(visualization.shape) == 2:  // If grayscale, convert to BGR for color visualization
+            visualization = cv2.cvtColor(visualization, cv2.COLOR_GRAY2BGR)
 
-    // Draw contours and bounding rectangles
-    for contour in sorted_contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(visualization, (x, y), (x + w, y + h), (0, 255, 0), 2)  // Draw rectangle
-        cv2.drawContours(visualization, [contour], -1, (255, 0, 0), 2)  // Draw contour
+        // Draw contours and bounding rectangles
+        for contour in sorted_contours:
+            x, y, w, h = cv2.boundingRect(contour)
+            cv2.rectangle(visualization, (x, y), (x + w, y + h), (0, 255, 0), 2)  // Draw rectangle
+            cv2.drawContours(visualization, [contour], -1, (255, 0, 0), 2)  // Draw contour
 
-    // Show the visualization
-    cv2.imshow('Contours and Bounding Rectangles', visualization)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        // Show the visualization
+        cv2.imshow('Contours and Bounding Rectangles', visualization)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-    // Return the bounding box of the largest contour, if it exists
-    if sorted_contours:
-        return cv2.boundingRect(sorted_contours[0])
-    else:
-        return None  // No bounding box found
+        // Return the bounding box of the largest contour, if it exists
+        if sorted_contours:
+            return cv2.boundingRect(sorted_contours[0])
+        else:
+            return None  // No bounding box found
 
-// Call the function with the zoomed corner region
-bounding_box = process_zoom_with_visualization(card_corner_zoom)
-print("Bounding Box:", bounding_box)
+    // Call the function with the zoomed corner region
+    bounding_box = process_zoom_with_visualization(card_corner_zoom)
+    print("Bounding Box:", bounding_box)
 Explanation of Changes:
 Visualization Added:
 
@@ -3186,25 +3186,25 @@ This code snippet is part of an image preprocessing pipeline. Let's break it dow
 1. Gaussian Blur
 python
 Copier le code
-blur = cv2.GaussianBlur(zoom_region, (5, 5), 0)
-Purpose: Reduces noise and smoothens the image.
-Function: cv2.GaussianBlur applies a Gaussian filter to the image.
-Parameters:
-zoom_region: Input image or region of interest. This is the part of the image being processed.
-(5, 5): The kernel size. This determines the size of the filter. Larger values produce more blurring.
-0: The standard deviation for the Gaussian kernel. If set to 0, OpenCV automatically calculates it based on the kernel size.
-This step helps in reducing noise that could interfere with edge detection in the next steps.
+    blur = cv2.GaussianBlur(zoom_region, (5, 5), 0)
+    Purpose: Reduces noise and smoothens the image.
+    Function: cv2.GaussianBlur applies a Gaussian filter to the image.
+    Parameters:
+    zoom_region: Input image or region of interest. This is the part of the image being processed.
+    (5, 5): The kernel size. This determines the size of the filter. Larger values produce more blurring.
+    0: The standard deviation for the Gaussian kernel. If set to 0, OpenCV automatically calculates it based on the kernel size.
+    This step helps in reducing noise that could interfere with edge detection in the next steps.
 
 2. Canny Edge Detection
 python
 Copier le code
-edges = cv2.Canny(blur, 50, 100)
-Purpose: Detects edges in the image by highlighting regions with a high intensity gradient.
-Function: cv2.Canny is an edge detection algorithm.
-Parameters:
-blur: Input image (already smoothed by the Gaussian blur).
-50: Lower threshold for the gradient intensity.
-100: Upper threshold for the gradient intensity.
+    edges = cv2.Canny(blur, 50, 100)
+    Purpose: Detects edges in the image by highlighting regions with a high intensity gradient.
+    Function: cv2.Canny is an edge detection algorithm.
+    Parameters:
+    blur: Input image (already smoothed by the Gaussian blur).
+    50: Lower threshold for the gradient intensity.
+    100: Upper threshold for the gradient intensity.
 How it works:
 
 Computes the gradient of the image intensity.
@@ -3274,9 +3274,9 @@ Current code:
 
 python
 Copier le code
-common_size = (100, 100)
-resized_roi1 = cv2.resize(roi1, common_size, interpolation=cv2.INTER_AREA)
-resized_roi2 = cv2.resize(roi2, common_size, interpolation=cv2.INTER_AREA)
+    common_size = (100, 100)
+    resized_roi1 = cv2.resize(roi1, common_size, interpolation=cv2.INTER_AREA)
+    resized_roi2 = cv2.resize(roi2, common_size, interpolation=cv2.INTER_AREA)
 Refinements:
 
 Dynamic common_size: Instead of hardcoding (100, 100), allow it to be dynamically specified as a parameter or based on the ROIs' original aspect ratios to avoid distortion.
@@ -3285,24 +3285,24 @@ Updated code:
 
 python
 Copier le code
-// Define common size dynamically or as a parameter
-common_size = (100, 100)  // Could also pass as an argument to the function
+    // Define common size dynamically or as a parameter
+    common_size = (100, 100)  // Could also pass as an argument to the function
 
-// Choose interpolation method based on size
-resize_method = cv2.INTER_AREA if roi1.shape[:2] > common_size else cv2.INTER_LINEAR
-resized_roi1 = cv2.resize(roi1, common_size, interpolation=resize_method)
+    // Choose interpolation method based on size
+    resize_method = cv2.INTER_AREA if roi1.shape[:2] > common_size else cv2.INTER_LINEAR
+    resized_roi1 = cv2.resize(roi1, common_size, interpolation=resize_method)
 
-resize_method = cv2.INTER_AREA if roi2.shape[:2] > common_size else cv2.INTER_LINEAR
-resized_roi2 = cv2.resize(roi2, common_size, interpolation=resize_method)
+    resize_method = cv2.INTER_AREA if roi2.shape[:2] > common_size else cv2.INTER_LINEAR
+    resized_roi2 = cv2.resize(roi2, common_size, interpolation=resize_method)
 2. Ensure Both are Grayscale
 Current code:
 
 python
 Copier le code
-if len(resized_roi1.shape) == 3:
-    resized_roi1 = cv2.cvtColor(resized_roi1, cv2.COLOR_BGR2GRAY)
-if len(resized_roi2.shape) == 3:
-    resized_roi2 = cv2.cvtColor(resized_roi2, cv2.COLOR_BGR2GRAY)
+    if len(resized_roi1.shape) == 3:
+        resized_roi1 = cv2.cvtColor(resized_roi1, cv2.COLOR_BGR2GRAY)
+    if len(resized_roi2.shape) == 3:
+        resized_roi2 = cv2.cvtColor(resized_roi2, cv2.COLOR_BGR2GRAY)
 Refinements:
 
 Batch processing: Combine the operations into a single reusable function to avoid redundancy.
@@ -3311,20 +3311,20 @@ Updated code:
 
 python
 Copier le code
-def ensure_grayscale(image):
-    if len(image.shape) == 3:  // If the image has 3 channels (color)
-        return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    return image  // Already grayscale
+    def ensure_grayscale(image):
+        if len(image.shape) == 3:  // If the image has 3 channels (color)
+            return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        return image  // Already grayscale
 
-// Apply the function to both ROIs
-resized_roi1 = ensure_grayscale(resized_roi1)
-resized_roi2 = ensure_grayscale(resized_roi2)
+    // Apply the function to both ROIs
+    resized_roi1 = ensure_grayscale(resized_roi1)
+    resized_roi2 = ensure_grayscale(resized_roi2)
 3. Compute Absolute Difference
 Current code:
 
 python
 Copier le code
-diff = cv2.absdiff(resized_roi1, resized_roi2)
+    diff = cv2.absdiff(resized_roi1, resized_roi2)
 Refinements:
 
 Normalization: Normalize the difference to enhance the contrast of the result.
@@ -3334,37 +3334,37 @@ Updated code:
 
 python
 Copier le code
-// Compute absolute difference
-diff = cv2.absdiff(resized_roi1, resized_roi2)
+    // Compute absolute difference
+    diff = cv2.absdiff(resized_roi1, resized_roi2)
 
-// Optional: Normalize the difference to enhance contrast
-diff = cv2.normalize(diff, None, 0, 255, cv2.NORM_MINMAX)
+    // Optional: Normalize the difference to enhance contrast
+    diff = cv2.normalize(diff, None, 0, 255, cv2.NORM_MINMAX)
 
-// Optional: Threshold to highlight significant differences
-_, diff = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)  // Threshold value (30) can be adjusted
+    // Optional: Threshold to highlight significant differences
+    _, diff = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)  // Threshold value (30) can be adjusted
 Final Optimized Code
 Here’s how the optimized block looks:
 
 python
 Copier le code
-// Resize ROIs to a common size
-common_size = (100, 100)  // Can be dynamically set or passed as a parameter
-resize_method = cv2.INTER_AREA if roi1.shape[:2] > common_size else cv2.INTER_LINEAR
-resized_roi1 = cv2.resize(roi1, common_size, interpolation=resize_method)
-resize_method = cv2.INTER_AREA if roi2.shape[:2] > common_size else cv2.INTER_LINEAR
-resized_roi2 = cv2.resize(roi2, common_size, interpolation=resize_method)
+    // Resize ROIs to a common size
+    common_size = (100, 100)  // Can be dynamically set or passed as a parameter
+    resize_method = cv2.INTER_AREA if roi1.shape[:2] > common_size else cv2.INTER_LINEAR
+    resized_roi1 = cv2.resize(roi1, common_size, interpolation=resize_method)
+    resize_method = cv2.INTER_AREA if roi2.shape[:2] > common_size else cv2.INTER_LINEAR
+    resized_roi2 = cv2.resize(roi2, common_size, interpolation=resize_method)
 
-// Ensure both are grayscale
-def ensure_grayscale(image):
-    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
+    // Ensure both are grayscale
+    def ensure_grayscale(image):
+        return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
 
-resized_roi1 = ensure_grayscale(resized_roi1)
-resized_roi2 = ensure_grayscale(resized_roi2)
+    resized_roi1 = ensure_grayscale(resized_roi1)
+    resized_roi2 = ensure_grayscale(resized_roi2)
 
-// Compute absolute difference
-diff = cv2.absdiff(resized_roi1, resized_roi2)
-diff = cv2.normalize(diff, None, 0, 255, cv2.NORM_MINMAX)  // Normalize the difference
-_, diff = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)  // Optional thresholding
+    // Compute absolute difference
+    diff = cv2.absdiff(resized_roi1, resized_roi2)
+    diff = cv2.normalize(diff, None, 0, 255, cv2.NORM_MINMAX)  // Normalize the difference
+    _, diff = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)  // Optional thresholding
 Advantages of Fine-tuning
 Adaptability: Dynamically handles resizing and avoids distortion.
 Reusability: Consolidates repetitive code into reusable functions.
@@ -3389,7 +3389,7 @@ These two operations are optional steps often used in image processing to enhanc
 1. Normalize the Difference
 python
 Copier le code
-diff = cv2.normalize(diff, None, 0, 255, cv2.NORM_MINMAX)
+    diff = cv2.normalize(diff, None, 0, 255, cv2.NORM_MINMAX)
 Purpose:
 Enhances the contrast of the difference image to make subtle variations more noticeable.
 Maps pixel values to a specified range, here from 0 to 255, which is the standard range for 8-bit grayscale images.
@@ -3431,7 +3431,7 @@ If the input image diff has pixel values in a narrow range (e.g., 50–100), nor
 2. Threshold to Highlight Significant Differences
 python
 Copier le code
-_, diff = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)
+    _, diff = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)
 Purpose:
 Converts the normalized difference image into a binary image to focus only on significant differences.
 Highlights areas where the difference exceeds a specific threshold.
@@ -3482,24 +3482,24 @@ The simplest method to upscale an image using OpenCV is with the cv2.resize func
 Example:
 python
 Copier le code
-import cv2
+    import cv2
 
-// Load the image
-image = cv2.imread('image.jpg')
+    // Load the image
+    image = cv2.imread('image.jpg')
 
-// Specify the scale factor or new dimensions
-scale_factor = 2  // Upscale by 2x
-new_width = int(image.shape[1] * scale_factor)
-new_height = int(image.shape[0] * scale_factor)
+    // Specify the scale factor or new dimensions
+    scale_factor = 2  // Upscale by 2x
+    new_width = int(image.shape[1] * scale_factor)
+    new_height = int(image.shape[0] * scale_factor)
 
-// Resize the image using INTER_CUBIC (best for upscaling)
-upscaled_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
+    // Resize the image using INTER_CUBIC (best for upscaling)
+    upscaled_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
 
-// Save or display the upscaled image
-cv2.imwrite('upscaled_image.jpg', upscaled_image)
-cv2.imshow('Upscaled Image', upscaled_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    // Save or display the upscaled image
+    cv2.imwrite('upscaled_image.jpg', upscaled_image)
+    cv2.imshow('Upscaled Image', upscaled_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 Notes:
 Interpolation Methods:
 cv2.INTER_NEAREST: Fast but may produce blocky artifacts.
@@ -3516,30 +3516,30 @@ Use OpenCV's DNN Super Resolution Module:
 
 python
 Copier le code
-import cv2
-from cv2 import dnn_superres
+    import cv2
+    from cv2 import dnn_superres
 
-// Load the image
-image = cv2.imread('image.jpg')
+    // Load the image
+    image = cv2.imread('image.jpg')
 
-// Create a Super Resolution object
-sr = dnn_superres.DnnSuperResImpl_create()
+    // Create a Super Resolution object
+    sr = dnn_superres.DnnSuperResImpl_create()
 
-// Read the pre-trained model (adjust path and scale accordingly)
-model_path = 'EDSR_x2.pb'  // Example: EDSR model for 2x upscaling
-sr.readModel(model_path)
+    // Read the pre-trained model (adjust path and scale accordingly)
+    model_path = 'EDSR_x2.pb'  // Example: EDSR model for 2x upscaling
+    sr.readModel(model_path)
 
-// Set the model and scale
-sr.setModel('edsr', 2)  // 'edsr' is the model name, and 2 is the scaling factor
+    // Set the model and scale
+    sr.setModel('edsr', 2)  // 'edsr' is the model name, and 2 is the scaling factor
 
-// Upscale the image
-upscaled_image = sr.upsample(image)
+    // Upscale the image
+    upscaled_image = sr.upsample(image)
 
-// Save or display the upscaled image
-cv2.imwrite('upscaled_image.jpg', upscaled_image)
-cv2.imshow('Upscaled Image', upscaled_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    // Save or display the upscaled image
+    cv2.imwrite('upscaled_image.jpg', upscaled_image)
+    cv2.imshow('Upscaled Image', upscaled_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 Models Available:
 EDSR (Enhanced Deep Residual Networks): High-quality results for upscaling.
 FSRCNN (Fast Super-Resolution Convolutional Neural Network): Faster but slightly lower quality.
@@ -3549,19 +3549,19 @@ If you want even higher quality, consider libraries like Real-ESRGAN or waifu2x 
 Example with Real-ESRGAN (Python Binding):
 python
 Copier le code
-from realesrgan import RealESRGAN
+    from realesrgan import RealESRGAN
 
-// Load the image
-image_path = 'image.jpg'
+    // Load the image
+    image_path = 'image.jpg'
 
-// Initialize the Real-ESRGAN model
-model = RealESRGAN('RealESRGAN_x4plus.pth')  // 4x upscale model
+    // Initialize the Real-ESRGAN model
+    model = RealESRGAN('RealESRGAN_x4plus.pth')  // 4x upscale model
 
-// Upscale the image
-upscaled_image = model.predict(image_path)
+    // Upscale the image
+    upscaled_image = model.predict(image_path)
 
-// Save the result
-upscaled_image.save('upscaled_image.jpg')
+    // Save the result
+    upscaled_image.save('upscaled_image.jpg')
 Tips for Best Results:
 Choose the Right Method:
 For quick results: Use cv2.INTER_CUBIC.
@@ -3569,7 +3569,8 @@ For high-quality results: Use DNN-based super-resolution or external AI models.
 Maintain Aspect Ratio: Ensure width and height are scaled proportionally to avoid distortion.
 Use Pre-trained Models: Leverage existing AI models for specific use cases like photos, artwork, or animations.
 Let me know if you'd like guidance on setting up any specific upscaling method!
-    def draw_results(image, card):
+ 
+ ###   def draw_results(image, card):
         """
         Draws the detected card's rank and center point on the image.
         
@@ -3614,7 +3615,7 @@ The error indicates that you are trying to concatenate a list and a string in th
 
 python
 Copier le code
-cv2.putText(image, rank_name + suit_name, (x - 60, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3, cv2.LINE_AA)
+    cv2.putText(image, rank_name + suit_name, (x - 60, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3, cv2.LINE_AA)
 Diagnosis
 rank_name or suit_name is a list instead of a string.
 cv2.putText expects the text to be a string, so concatenating two lists or a list and a string causes the error.
@@ -3623,8 +3624,8 @@ Ensure rank_name and suit_name are strings. Check how card.rank and card.suit ar
 
 python
 Copier le code
-rank_name = ''.join(card.rank) if isinstance(card.rank, list) else card.rank
-suit_name = ''.join(card.suit) if isinstance(card.suit, list) else card.suit
+    rank_name = ''.join(card.rank) if isinstance(card.rank, list) else card.rank
+    suit_name = ''.join(card.suit) if isinstance(card.suit, list) else card.suit
 Debugging Check
 Print the values of card.rank and card.suit before concatenation to ensure their types:
 
@@ -3636,7 +3637,7 @@ Fix the Concatenation If you confirm they are lists, modify the cv2.putText line
 
 python
 Copier le code
-cv2.putText(image, str(rank_name) + str(suit_name), (x - 60, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3, cv2.LINE_AA)
+    cv2.putText(image, str(rank_name) + str(suit_name), (x - 60, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 3, cv2.LINE_AA)
 Corrected Code Example
 python
 Copier le code
@@ -3688,20 +3689,20 @@ First, load the image using cv2.imread, then apply cv2.cvtColor to change its co
 
 python
 Copier le code
-import cv2
+    import cv2
 
-// Read the image from the specified path
-image = cv2.imread('Full family/H.jpg')
+    // Read the image from the specified path
+    image = cv2.imread('Full family/H.jpg')
 
-// Check if the image was loaded successfully
-if image is None:
-    print("Error: Could not read the image.")
-else:
-    // Convert the image to a different color space (e.g., BGR to grayscale)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-Explanation of Changes:
-cv2.imread('Full family/H.jpg'): Reads the image from the given path into a numpy array.
-cv2.cvtColor(image, cv2.COLOR_BGR2GRAY): Converts the loaded image from BGR color space to grayscale.
+    // Check if the image was loaded successfully
+    if image is None:
+        print("Error: Could not read the image.")
+    else:
+        // Convert the image to a different color space (e.g., BGR to grayscale)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    Explanation of Changes:
+    cv2.imread('Full family/H.jpg'): Reads the image from the given path into a numpy array.
+    cv2.cvtColor(image, cv2.COLOR_BGR2GRAY): Converts the loaded image from BGR color space to grayscale.
 Debugging Tips:
 Make sure the path 'Full family/H.jpg' is correct and points to an existing file. If the file is not found, cv2.imread will return None.
 If you are unsure of the current directory, use the following to check:
@@ -3827,19 +3828,19 @@ Modify process_zoom() to verify its output:
 
 python
 Copier le code
-def process_zoom(image):
-    // Your existing implementation...
-    processed_image = ...  // Ensure this is a valid image.
-    
-    print("process_zoom output shape:", processed_image.shape)
-    return processed_image
+    def process_zoom(image):
+        // Your existing implementation...
+        processed_image = ...  // Ensure this is a valid image.
+        
+        print("process_zoom output shape:", processed_image.shape)
+        return processed_image
 Step 3: Verify Usage
 If process_zoom() is supposed to return multiple values (e.g., a tuple of images or metadata), ensure you are unpacking it correctly. For example:
 
 python
 Copier le code
-processed, metadata = process_zoom(image)  // Unpack if necessary
-plt.imshow(processed)
+    processed, metadata = process_zoom(image)  // Unpack if necessary
+    plt.imshow(processed)
 Step 4: Handle Shape Mismatches
 If the output of process_zoom() is not an image:
 
@@ -3847,20 +3848,20 @@ Convert it to an image format, if possible.
 If it’s a single color or a constant, create an array:
 python
 Copier le code
-import numpy as np
-processed = np.full((100, 100, 3), processed, dtype=np.uint8)  // Example placeholder
+    import numpy as np
+    processed = np.full((100, 100, 3), processed, dtype=np.uint8)  // Example placeholder
 Example Fix
 Here’s how you might adapt the code:
 
 python
 Copier le code
-processed = process_zoom(image)
-if len(processed.shape) not in [2, 3]:
-    raise ValueError("Invalid output shape from process_zoom: expected 2D or 3D array, got shape {}".format(processed.shape))
+    processed = process_zoom(image)
+    if len(processed.shape) not in [2, 3]:
+        raise ValueError("Invalid output shape from process_zoom: expected 2D or 3D array, got shape {}".format(processed.shape))
 
-plt.imshow(processed)
-plt.title('Test')
-plt.show()
+    plt.imshow(processed)
+    plt.title('Test')
+    plt.show()
 Summary
 The error likely stems from process_zoom() returning an unexpected output, such as a 1D array or tuple. By inspecting and fixing its return value to ensure it outputs a valid 2D or 3D image, you can resolve this issue.
 
@@ -3890,23 +3891,23 @@ Grayscale Conversion:
 
 python
 Copier le code
-if len(image.shape) == 3:
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-else:
-    gray = image
+    if len(image.shape) == 3:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = image
 If the image has three channels (color image), it is converted to grayscale.
 If the image is already in grayscale, it's used as is.
 Gaussian Blur:
 
 python
 Copier le code
-blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
 A 5x5 Gaussian kernel is applied to reduce noise and detail.
 Thresholding:
 
 python
 Copier le code
-retval, thresh = cv2.threshold(blur, THRESH_LVL, 255, cv2.THRESH_BINARY)
+    retval, thresh = cv2.threshold(blur, THRESH_LVL, 255, cv2.THRESH_BINARY)
 Pixels above the threshold (THRESH_LVL) are set to 255 (white), and those below are set to 0 (black).
 Return:
 
@@ -3920,14 +3921,14 @@ Make THRESH_LVL a parameter of the function with a default value:
 
 python
 Copier le code
-def Process_image(image, THRESH_LVL=128):
-    if len(image.shape) == 3:
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    else:
-        gray = image
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    retval, thresh = cv2.threshold(blur, THRESH_LVL, 255, cv2.THRESH_BINARY)
-    return thresh
+    def Process_image(image, THRESH_LVL=128):
+        if len(image.shape) == 3:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = image
+        blur = cv2.GaussianBlur(gray, (5, 5), 0)
+        retval, thresh = cv2.threshold(blur, THRESH_LVL, 255, cv2.THRESH_BINARY)
+        return thresh
 Issue 2: Flexibility in Parameters
 Kernel size for Gaussian blur is fixed at (5, 5). Allow it to be configurable.
 Updated Function:
@@ -3938,41 +3939,41 @@ Copier le code
 import cv2
 import numpy as np
 
-def Process_image(image, THRESH_LVL=128, blur_kernel=(5, 5)):
-    """
-    Preprocesses the input image by converting it to grayscale (if needed),
-    applying Gaussian blur, and thresholding.
+    def Process_image(image, THRESH_LVL=128, blur_kernel=(5, 5)):
+        """
+        Preprocesses the input image by converting it to grayscale (if needed),
+        applying Gaussian blur, and thresholding.
 
-    Args:
-        image (ndarray): The input image (grayscale or BGR).
-        THRESH_LVL (int): The threshold level for binary thresholding.
-        blur_kernel (tuple): The kernel size for Gaussian blur.
+        Args:
+            image (ndarray): The input image (grayscale or BGR).
+            THRESH_LVL (int): The threshold level for binary thresholding.
+            blur_kernel (tuple): The kernel size for Gaussian blur.
 
-    Returns:
-        ndarray: The thresholded image.
-    """
-    / Convert to grayscale if needed
-    if len(image.shape) == 3:
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    else:
-        gray = image
+        Returns:
+            ndarray: The thresholded image.
+        """
+        / Convert to grayscale if needed
+        if len(image.shape) == 3:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = image
 
-    // Apply Gaussian blur
-    blur = cv2.GaussianBlur(gray, blur_kernel, 0)
+        // Apply Gaussian blur
+        blur = cv2.GaussianBlur(gray, blur_kernel, 0)
 
-    // Apply thresholding
-    retval, thresh = cv2.threshold(blur, THRESH_LVL, 255, cv2.THRESH_BINARY)
+        // Apply thresholding
+        retval, thresh = cv2.threshold(blur, THRESH_LVL, 255, cv2.THRESH_BINARY)
 
-    return thresh
+        return thresh
 Example Usage:
 python
 Copier le code
-image = cv2.imread('example.jpg')
-processed = Process_image(image, THRESH_LVL=150, blur_kernel=(7, 7))
+    image = cv2.imread('example.jpg')
+    processed = Process_image(image, THRESH_LVL=150, blur_kernel=(7, 7))
 
-// Display the result
-import matplotlib.pyplot as plt
-plt.imshow(processed, cmap='gray')
-plt.title('Processed Image')
-plt.show()
+    // Display the result
+    import matplotlib.pyplot as plt
+    plt.imshow(processed, cmap='gray')
+    plt.title('Processed Image')
+    plt.show()
 This ensures Process_image is flexible, robust, and self-contained.
