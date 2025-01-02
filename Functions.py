@@ -13,42 +13,65 @@ THRESH_LVL = 140  # scale to the luminosity of your test environnement
 
 
 class Template:
-    """Structure to store information about family rank images."""
+    """Structure to store information about template images."""
 
     def __init__(self):
         self.img = [] # Thresholded, sized rank image loaded from hard drive
         self.rank = "Placeholder"
         self.value = 0
 
-def Load_Templates(filepath):    
-    ranks = ["A", "2", "3", "4","5",
+def Load_Templates(filepath):
+    """
+    Loads card templates (rank and suit images) from a specified directory.
+    Each template is assigned a rank, suit, and value based on standard card rules.
+
+    Args:
+        filepath (str): Path to the directory containing card template images.
+
+    Returns:
+        list: A list of Template objects, each representing a card template with
+              attributes such as rank, suit, value, and the associated image.
+    """
+    # Define ranks and suits
+    ranks = ["A", "2", "3", "4", "5",
              "6", "7", "8", "9", "10",
              "J", "Q", "K"]
     suits = ["H", "S", "D", "C"]
 
+    # List to store all template objects
     templates = []
+
+    # Iterate over each suit
     for suit in suits:
+        # Iterate over each rank
         for rank in ranks:
+            # Initialize a Template object
             t_object = Template()
-            t_object.rank = f"{rank}{suit}"
-            if rank in ['J', 'Q', 'K']:  
-                    t_object.value = 10
-            elif rank == 'A':  
+            t_object.rank = f"{rank}{suit}"  # Set the rank and suit as a combined identifier
+
+            # Assign card value based on the rank
+            if rank in ['J', 'Q', 'K']:  # Face cards have a value of 10
+                t_object.value = 10
+            elif rank == 'A':  # Aces have a value of 11
                 t_object.value = 11
-            else:
+            else:  # Numeric cards have their rank as the value
                 t_object.value = int(rank)
 
+            # Construct the filename for the card template image
             filename = f"{rank}{suit}.jpg"
-            img_path = os.path.join(filepath, filename)
-            
-            # Load image and handle potential errors
+            img_path = os.path.join(filepath, filename)  # Full path to the image
+
+            # Load the template image and handle potential errors
             t_object.img = cv2.imread(img_path)
             if t_object.img is None:
-                print(f"Warning: Image {img_path} could not be loaded.")
+                print(f"Warning: Image {img_path} could not be loaded.")  # Warn if the image is missing
 
+            # Add the Template object to the list
             templates.append(t_object)
 
-    return templates        
+    # Return the list of all loaded templates
+    return templates
+
 
 
 
@@ -65,57 +88,91 @@ class Card:
         self.value = 0 # Detected value of the card
 
 
-def Process_image(image, isCard = 0):
+def Process_image(image, isCard=0):
+    """
+    Preprocesses the input image for further processing by converting it to grayscale,
+    applying Gaussian blur, and thresholding.
 
+    Args:
+        image (ndarray): The input image, either in grayscale or color.
+        isCard (int, optional): Flag indicating if the image contains a card (1 for card, 0 otherwise).
+                                Defaults to 0.
+
+    Returns:
+        ndarray: A binary thresholded image.
+    """
+    # Convert to grayscale if the image is in color
     if len(image.shape) == 3:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     else:
-        gray = image
+        gray = image  # Image is already in grayscale
+
+    # Apply Gaussian blur to reduce noise and smoothen the image
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    
+
+    # Determine the image dimensions and select a central point for analysis
     height, width = gray.shape
-    x = width // 2  
-    y = height - 7   
+    x = width // 2  # Horizontal center
+    y = height - 7  # Near the bottom of the image
 
-    if isCard == 1 :
-        white_pixel_intensity = gray[y, x]
-        dynamic_thresh_lvl = max(white_pixel_intensity - 15, 0)
+    # Set threshold level dynamically if processing a card image
+    if isCard == 1:
+        white_pixel_intensity = gray[y, x]  # Intensity of a pixel near the bottom center
+        dynamic_thresh_lvl = max(white_pixel_intensity - 15, 0)  # Adjust threshold to handle card brightness
         thresh_lvl = dynamic_thresh_lvl
-    else :
-        thresh_lvl = THRESH_LVL
+    else:
+        thresh_lvl = THRESH_LVL  # Use a predefined threshold level for non-card images
 
-    retval, thresh = cv2.threshold(blur,thresh_lvl,255,cv2.THRESH_BINARY)
+    # Apply binary thresholding to create a binary image
+    retval, thresh = cv2.threshold(blur, thresh_lvl, 255, cv2.THRESH_BINARY)
+
     return thresh
 
 def Find_cards(image):
+    """
+    Identifies potential card contours in an image and draws valid contours.
 
+    Args:
+        image (ndarray): The input image, either grayscale or color.
+
+    Returns:
+        tuple:
+            - valid_contours (list): A list of contours that match the criteria for being cards.
+            - output_image (ndarray): A copy of the input image with valid contours drawn.
+    """
+    # Preprocess the input image to obtain a binary thresholded image
     img = Process_image(image)
-     # Find contours and their hierarchy
+
+    # Find contours and their hierarchy from the processed binary image
     contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    valid_contours = []  # List to store valid card contours
-    output_image = image.copy()  # Copy of the input image for drawing contours
+    valid_contours = []  # Initialize a list to store contours that represent cards
+    output_image = image.copy()  # Create a copy of the input image for visualization
 
     # Return early if no contours are found
     if len(contours) == 0:
         return valid_contours, output_image
-    
+
+    # Iterate through all detected contours
     for i, contour in enumerate(contours):
-        size = cv2.contourArea(contour)  # Calculate contour area
-        if not (CARD_MIN_AREA < size < CARD_MAX_AREA):  # Check if area is within valid range
+        size = cv2.contourArea(contour)  # Calculate the area of the contour
+        
+        # Check if the contour's area is within the valid range for cards
+        if not (CARD_MIN_AREA < size < CARD_MAX_AREA):
             continue
         
         # Approximate the contour to a polygon
-        peri = cv2.arcLength(contour, True)
-        approx = cv2.approxPolyDP(contour, 0.1 * peri, True)
-        
-        # Only consider quadrilateral contours that are not nested
-        if len(approx) == 4 and hierarchy[0][i][3] == -1 :
-            valid_contours.append(contour)
-            # Draw the valid contour on the output image
+        peri = cv2.arcLength(contour, True)  # Calculate the perimeter of the contour
+        approx = cv2.approxPolyDP(contour, 0.1 * peri, True)  # Approximate the contour
+
+        # Check if the approximated contour is a quadrilateral and not nested
+        if len(approx) == 4 and hierarchy[0][i][3] == -1:
+            valid_contours.append(contour)  # Add the contour to the valid list
+            # Draw the valid contour on the output image in green
             cv2.drawContours(output_image, [contours[i]], -1, (0, 255, 0), 3)
 
     return valid_contours, output_image
+
 
 
 def Process_Card(contour, image):
@@ -129,9 +186,6 @@ def Process_Card(contour, image):
     Returns:
         Card: A Card object with processed attributes.
     """
-    import numpy as np
-    import cv2
-
     # Initialize the Card object
     card = Card()
     card.contour = contour  # Store the contour
@@ -220,17 +274,28 @@ def Reshape_Card(image, corner_pts, width, height):
 
 
 def compute_diff_score(image1, image2):
+    """
+    Computes a difference score between two images by processing them and summing their absolute differences.
 
-        img1 = Process_image(image1,1)
-        img2 = Process_image(image2,1)
+    Args:
+        image1 (ndarray): The first input image.
+        image2 (ndarray): The second input image.
 
-        # Compute absolute difference
-        diff = cv2.absdiff(img1, img2)
+    Returns:
+        int: A score representing the sum of absolute differences between the two images.
+             A lower score indicates higher similarity.
+    """
+    # Preprocess both images to generate binary thresholded versions
+    img1 = Process_image(image1, 1)  # Process the first image with card-specific settings
+    img2 = Process_image(image2, 1)  # Process the second image with card-specific settings
 
-       
+    # Compute the absolute difference between the two processed images
+    diff = cv2.absdiff(img1, img2)
 
-        # Sum the differences as a similarity score
-        return np.sum(diff)
+    # Sum the pixel differences to calculate a similarity score
+    # A lower sum indicates the images are more similar
+    return np.sum(diff)
+
 
 
 
@@ -316,30 +381,50 @@ def draw_results(image, card):
     return image
 
 
-def Save_template_cards(card, dest_folder,unique_name):
+def Save_template_cards(card, dest_folder, unique_name):
+    """
+    Saves a card image to the specified folder with a unique filename.
+
+    Args:
+        card (ndarray): The card image to be saved.
+        dest_folder (str): The destination folder where the image will be stored.
+        unique_name (str): A unique identifier for naming the saved file.
+
+    Returns:
+        None
+    """
+    # Construct the full path for the output file using the unique name and destination folder
     filename = os.path.join(dest_folder, f'{unique_name}.jpg')
+
+    # Save the card image as a .jpg file
     cv2.imwrite(filename, card)
 
-import cv2
+
+
 
 def divide_into_zones(frame, scorep1=0, scorep2=0, scorep3=0, scorep4=0):
     """
-    Divides the frame into 4 zones: top-left, top-right, bottom-left, bottom-right.
-    Also marks the zone with the highest score with the text "winning" in the center of that zone.
-    
-    Args:
-        frame: The input video frame.
-        scorep1, scorep2, scorep3, scorep4: Scores for each of the four zones.
-    
-    Returns:
-        The modified frame with the zones and the "winning" text, and the zones dictionary.
-    """
-    height, width, _ = frame.shape  # Get frame dimensions
+    Divides the input frame into four zones: top-left, top-right, bottom-left, and bottom-right.
+    Annotates each zone with the corresponding score and identifies the zone with the highest score
+    or marks it as a tie. Adds "Lost" or "blackjack!" text for specific conditions.
 
-    # Calculate midpoints
+    Args:
+        frame (ndarray): The input video frame.
+        scorep1, scorep2, scorep3, scorep4 (int, optional): Scores for each of the four zones. Defaults to 0.
+
+    Returns:
+        tuple:
+            - frame (ndarray): The modified frame with annotated zones and status text.
+            - zones (dict): A dictionary with keys for each zone and their respective cropped areas.
+    """
+
+    # Get the dimensions of the frame
+    height, width, _ = frame.shape
+
+    # Calculate midpoints to define the boundaries of the zones
     mid_x, mid_y = width // 2, height // 2
 
-    # Define the zones
+    # Define zones as regions of the frame
     zones = {
         "top_left": frame[0:mid_y, 0:mid_x],
         "top_right": frame[0:mid_y, mid_x:width],
@@ -347,39 +432,37 @@ def divide_into_zones(frame, scorep1=0, scorep2=0, scorep3=0, scorep4=0):
         "bottom_right": frame[mid_y:height, mid_x:width]
     }
 
-    # Draw visual lines for the zones
+    # Draw dividing lines to visually separate zones
     cv2.line(frame, (mid_x, 0), (mid_x, height), (0, 255, 0), 2)  # Vertical line
     cv2.line(frame, (0, mid_y), (width, mid_y), (0, 255, 0), 2)   # Horizontal line
 
-    # Add titles for each zone
+    # Annotate each zone with its respective player's score
     titles = {
-        "top_left": f"Player 1 : {scorep1} ",
-        "top_right": f"Player 2 : {scorep2} ",
-        "bottom_left": f"Player 3 : {scorep3} ",
-        "bottom_right": f"Player 4 : {scorep4} "
+        "top_left": f"Player 1 : {scorep1}",
+        "top_right": f"Player 2 : {scorep2}",
+        "bottom_left": f"Player 3 : {scorep3}",
+        "bottom_right": f"Player 4 : {scorep4}"
     }
-
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 0.8
     color = (0, 255, 0)  # Green
     thickness = 2
 
-    # Add text for each zone
+    # Draw the titles on the frame
     cv2.putText(frame, titles["top_left"], (10, 30), font, font_scale, color, thickness, cv2.LINE_AA)
     cv2.putText(frame, titles["top_right"], (mid_x + 10, 30), font, font_scale, color, thickness, cv2.LINE_AA)
     cv2.putText(frame, titles["bottom_left"], (10, mid_y + 30), font, font_scale, color, thickness, cv2.LINE_AA)
     cv2.putText(frame, titles["bottom_right"], (mid_x + 10, mid_y + 30), font, font_scale, color, thickness, cv2.LINE_AA)
 
-    # Determine which zone has the highest score
+    # Compute the highest score and determine the winning zone
     scores = [scorep1, scorep2, scorep3, scorep4]
     zones_names = ["top_left", "top_right", "bottom_left", "bottom_right"]
 
-    # Filter scores greater than 21
+    # Adjust scores, treating those over 21 as invalid (-inf)
     valid_scores = [score if score <= 21 else float('-inf') for score in scores]
 
-    # Find the index of the highest valid score
-    if max(valid_scores) == float('-inf'):
-        # All scores are over 21
+    # Check for a draw or a winning zone
+    if max(valid_scores) == float('-inf'):  # All scores exceed 21
         center = (mid_x, mid_y)
         status = "Draw"
     else:
@@ -387,14 +470,12 @@ def divide_into_zones(frame, scorep1=0, scorep2=0, scorep3=0, scorep4=0):
         winning_zone = zones_names[max_score_index]
         status = "Winning"
 
-    # Handling ties
+    # Handle ties for the highest score
     highest_scores = sorted(valid_scores, reverse=True)
-
-    # Determine the center coordinates of the winning zone
-    if max(valid_scores) == 0:
+    if max(valid_scores) == 0:  # No valid scores
         center = (mid_x, mid_y)
         status = ""
-    elif highest_scores[0] == highest_scores[1]:
+    elif highest_scores[0] == highest_scores[1]:  # Tie detected
         center = (mid_x, mid_y)
         status = "Draw"
     elif winning_zone == "top_left":
@@ -403,30 +484,30 @@ def divide_into_zones(frame, scorep1=0, scorep2=0, scorep3=0, scorep4=0):
         center = (mid_x + mid_x // 2, mid_y // 2)
     elif winning_zone == "bottom_left":
         center = (mid_x // 2, mid_y + mid_y // 2)
-    elif winning_zone == "bottom_right":  # "bottom_right"
+    elif winning_zone == "bottom_right":
         center = (mid_x + mid_x // 2, mid_y + mid_y // 2)
 
-    # Add "Lost" text to zones with scores over 21
+    # Annotate zones with "Bust" if scores exceed 21 or "blackjack!" for scores of 21
     for i, score in enumerate(scores):
         if score > 21:
             zone_center = (mid_x // 2, mid_y // 2) if zones_names[i] == "top_left" else (
                 (mid_x + mid_x // 2, mid_y // 2) if zones_names[i] == "top_right" else (
                     (mid_x // 2, mid_y + mid_y // 2) if zones_names[i] == "bottom_left" else (mid_x + mid_x // 2, mid_y + mid_y // 2)))
             cv2.putText(frame, "Bust", zone_center, font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
-        elif score == 21:    
-            zone_center = (mid_x // 2,(mid_y // 2)+50) if zones_names[i] == "top_left" else (
-                (mid_x + mid_x // 2, mid_y // 2+50) if zones_names[i] == "top_right" else (
-                    (mid_x // 2, mid_y + mid_y // 2+50) if zones_names[i] == "bottom_left" else (mid_x + mid_x // 2, mid_y + mid_y // 2+50)))
+        elif score == 21:
+            zone_center = (mid_x // 2, (mid_y // 2) + 50) if zones_names[i] == "top_left" else (
+                (mid_x + mid_x // 2, mid_y // 2 + 50) if zones_names[i] == "top_right" else (
+                    (mid_x // 2, mid_y + mid_y // 2 + 50) if zones_names[i] == "bottom_left" else (mid_x + mid_x // 2, mid_y + mid_y // 2 + 50)))
             cv2.putText(frame, "blackjack!", zone_center, font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
 
-    # Add "winning" text to the winning zone
+    # Add "winning" or "Draw" status to the center of the frame or the winning zone
     if status == "Winning":
         cv2.putText(frame, status, center, font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
     elif status == "Draw":
         cv2.putText(frame, status, center, font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
 
-
     return frame, zones
+
 
 
 def determine_zone(frame, card):
