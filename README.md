@@ -19,4 +19,10 @@ Camera image.ipynb contains also the tests and demonstration but for the live ca
 
 Prompt_logs.md contains all the logs made with Chatgpt
 
+## Demonstration 
 
+https://www.youtube.com/watch?v=yWMs7VNdODA
+
+## Inspiration
+
+https://github.com/EdjeElectronics/OpenCV-Playing-Card-Detector/tree/master
