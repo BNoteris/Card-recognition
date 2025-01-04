@@ -1,6 +1,8 @@
 # Card recognition program and blackjack simulator
 
-Program designed to recognize playing cards patterns and simulate a blackjack game
+Program designed to recognize playing cards patterns and simulate a blackjack game.
+This project was completed as part of a school evaluation using JupyterLab and OpenCV.
+
 
 ## Usage
 
@@ -15,7 +17,7 @@ Functions.py contains every functions and classes
 
 Fixed Image.ipynb contains tests and demonstrations of the functions to make them work on a fixed image
 
-Camera image.ipynb contains also the tests and demonstration but for the live camera.
+Camera image.ipynb contains also the tests and demonstration but for the live camera
 
 Prompt_logs.md contains all the logs made with Chatgpt
 
