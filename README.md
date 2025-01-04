@@ -19,6 +19,10 @@ Camera image.ipynb contains also the tests and demonstration but for the live ca
 
 Prompt_logs.md contains all the logs made with Chatgpt
 
+Full family folder contains the screenshot taken to make the templates
+
+Cards folder contains all the templates
+
 ## Demonstration 
 
 https://www.youtube.com/watch?v=yWMs7VNdODA
